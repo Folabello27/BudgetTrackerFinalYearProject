@@ -1,74 +1,68 @@
-# Budget Tracker Mobile App
+# Personal Budget Tracker - Final Year Project
 
-A React Native Expo mobile app for tracking your income and expenses.
+## Project Overview
+This mobile application is my Final Year Project (FYP) for the BSc in Computing at Dorset College, Dublin. The **Personal Budget Tracker** is a cross-platform solution designed to empower users to take control of their financial health through real-time expense tracking and data-driven insights.
 
-## Features
+## Student Information
+* **Student Name:** Raheem Folarin
+* **Student ID:** 71757
+* **Institution:** Dorset College, Dublin, Ireland
+* **Course:** BSc in Computing
 
-- 📊 Dashboard with balance overview
-- ➕ Add income and expense transactions
-- 📝 View transaction history
-- 🗑️ Delete transactions (long press)
-- 💾 Local data persistence with AsyncStorage
-- 🎨 Modern, clean UI
+---
+
+## Tech Stack
+* **Frontend:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
+* **Backend/Database:** [Supabase](https://supabase.com/) 
+* **Authentication:** Supabase Auth 
+* **Styling:** NativeWind / Styled Components
+
+## Key Features
+* **Secure Authentication:** User signup and login powered by Supabase Auth.
+* **Real-time Sync:** Instant database updates across devices.
+* **Expense Logging:** Categorized spending with date and amount tracking.
+* **Budget Analytics:** Visual breakdown of monthly spending habits.
+* **Cloud Storage:** All financial data is securely stored in the Supabase cloud.
 
 ## Getting Started
 
 ### Prerequisites
+* [Node.js](https://nodejs.org/) (LTS)
+* [Expo Go](https://expo.dev/client) app on your mobile device (to preview)
+* A [Supabase](https://supabase.com/) project set up
 
-- Node.js installed
-- Expo CLI installed globally: `npm install -g expo-cli`
-- Expo Go app on your mobile device (iOS or Android)
+### Installation & Setup
 
-### Installation
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/Folabello27/BudgetTrackerFinalYearProject.git](https://github.com/Folabello27/BudgetTrackerFinalYearProject.git)
+    cd BudgetTrackerFinalYearProject
+    ```
 
-1. Install dependencies:
-```bash
-npm install
-```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-2. Start the Expo development server:
-```bash
-npm start
-```
+3.  **Configure Environment Variables:**
+    Create a `.env` file in the root directory and add your Supabase credentials:
+    ```env
+    EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+    EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
 
-3. Scan the QR code with:
-   - **iOS**: Camera app
-   - **Android**: Expo Go app
+4.  **Start the project:**
+    ```bash
+    npx expo start
+    ```
 
-## Project Structure
+5.  **View the app:**
+    Scan the QR code appearing in the terminal using the **Expo Go** app on your phone.
 
-```
-BudgetTracker/
-├── App.js                 # Main app component with navigation
-├── screens/
-│   ├── HomeScreen.js      # Dashboard with balance and recent transactions
-│   ├── AddTransactionScreen.js  # Form to add new transactions
-│   └── HistoryScreen.js   # Full transaction history with filters
-├── utils/
-│   └── storage.js         # AsyncStorage utilities for data persistence
-└── package.json
-```
+---
 
-## Usage
+## License
+This project was submitted as part of the BSc in Computing degree at Dorset College Dublin. All rights reserved by the author.
 
-1. **Dashboard (Home)**: View your current balance, total income, total expenses, and recent transactions
-2. **Add Transaction**: Tap the "+" tab to add income or expense transactions
-3. **History**: View all transactions, filter by type, and delete transactions by long pressing
-
-## Technologies Used
-
-- React Native
-- Expo
-- React Navigation (Bottom Tabs)
-- AsyncStorage for local data persistence
-- Expo Linear Gradient
-
-## Future Enhancements
-
-- Categories with icons
-- Budget limits and alerts
-- Charts and graphs
-- Export to CSV
-- Multiple accounts/wallets
-- Recurring transactions
-
+## Contact
+**Raheem Folarin** GitHub: [@Folabello27](https://github.com/Folabello27)
