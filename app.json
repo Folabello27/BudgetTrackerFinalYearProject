@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Budget Tracker",
+    "slug": "budgettracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#4A90E2",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.budgettracker.app"
+    },
+    "android": {
+      "package": "com.budgettracker.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#4A90E2"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
+
