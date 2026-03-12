@@ -1,68 +1,50 @@
-# Personal Budget Tracker - Final Year Project
+# Welcome to your Expo app 👋
 
-## Project Overview
-This mobile application is my Final Year Project (FYP) for the BSc in Computing at Dorset College, Dublin. The **Personal Budget Tracker** is a cross-platform solution designed to empower users to take control of their financial health through real-time expense tracking and data-driven insights.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Student Information
-* **Student Name:** Raheem Folarin
-* **Student ID:** 71757
-* **Institution:** Dorset College, Dublin, Ireland
-* **Course:** BSc in Computing
+## Get started
 
----
+1. Install dependencies
 
-## Tech Stack
-* **Frontend:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
-* **Backend/Database:** [Supabase](https://supabase.com/) 
-* **Authentication:** Supabase Auth 
-* **Styling:** NativeWind / Styled Components
+   ```bash
+   npm install
+   ```
 
-## Key Features
-* **Secure Authentication:** User signup and login powered by Supabase Auth.
-* **Real-time Sync:** Instant database updates across devices.
-* **Expense Logging:** Categorized spending with date and amount tracking.
-* **Budget Analytics:** Visual breakdown of monthly spending habits.
-* **Cloud Storage:** All financial data is securely stored in the Supabase cloud.
+2. Start the app
 
-## Getting Started
+   ```bash
+   npx expo start
+   ```
 
-### Prerequisites
-* [Node.js](https://nodejs.org/) (LTS)
-* [Expo Go](https://expo.dev/client) app on your mobile device (to preview)
-* A [Supabase](https://supabase.com/) project set up
+In the output, you'll find options to open the app in a
 
-### Installation & Setup
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/Folabello27/BudgetTrackerFinalYearProject.git](https://github.com/Folabello27/BudgetTrackerFinalYearProject.git)
-    cd BudgetTrackerFinalYearProject
-    ```
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+## Get a fresh project
 
-3.  **Configure Environment Variables:**
-    Create a `.env` file in the root directory and add your Supabase credentials:
-    ```env
-    EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-    EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
+When you're ready, run:
 
-4.  **Start the project:**
-    ```bash
-    npx expo start
-    ```
+```bash
+npm run reset-project
+```
 
-5.  **View the app:**
-    Scan the QR code appearing in the terminal using the **Expo Go** app on your phone.
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
----
+## Learn more
 
-## License
-This project was submitted as part of the BSc in Computing degree at Dorset College Dublin. All rights reserved by the author.
+To learn more about developing your project with Expo, look at the following resources:
 
-## Contact
-**Raheem Folarin** GitHub: [@Folabello27](https://github.com/Folabello27)
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+
+## Join the community
+
+Join our community of developers creating universal apps.
+
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
