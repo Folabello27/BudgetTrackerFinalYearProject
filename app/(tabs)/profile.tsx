@@ -1,4 +1,6 @@
+import { CurrencySelector } from '@/components/currency-selector';
 import { Colors } from '@/constants/Colors';
+import { useCurrency } from '@/hooks/use-currency';
 import { BiometricService } from '@/lib/biometrics';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
@@ -7,23 +9,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const PERSONALITIES = {
@@ -61,6 +63,7 @@ const PERSONALITIES = {
 
 export default function ProfileScreen() {
   const { theme, toggleTheme } = useTheme();
+  const { currency, setCurrency } = useCurrency();
   const isDark = theme === 'dark';
   const colors = Colors[theme];
 
@@ -73,6 +76,7 @@ export default function ProfileScreen() {
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [biometricType, setBiometricType] = useState('Biometrics');
   const [refreshing, setRefreshing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Modals
   const [isAccountModalVisible, setIsAccountModalVisible] = useState(false);
@@ -97,6 +101,14 @@ export default function ProfileScreen() {
           setFullName(user.user_metadata.full_name);
           setEditName(user.user_metadata.full_name);
         }
+
+        // Check if user is admin
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        setIsAdmin(profile?.role === 'admin');
       }
 
       const notifyPref = await AsyncStorage.getItem('notificationsEnabled');
@@ -330,6 +342,31 @@ export default function ProfileScreen() {
             />
             <View style={[styles.divider, isDark && styles.dividerDark]} />
             <MenuLink
+              icon="wallet-outline"
+              label="Savings Goals"
+              onPress={() => router.push('/savings-goals')}
+              isDark={isDark}
+            />
+            <View style={[styles.divider, isDark && styles.dividerDark]} />
+            <MenuLink
+              icon="analytics-outline"
+              label="Smart Insights"
+              onPress={() => router.push('/smart-insights')}
+              isDark={isDark}
+            />
+            {isAdmin && (
+              <>
+                <View style={[styles.divider, isDark && styles.dividerDark]} />
+                <MenuLink
+                  icon="briefcase-outline"
+                  label="Admin Dashboard"
+                  onPress={() => router.push('/admin')}
+                  isDark={isDark}
+                />
+              </>
+            )}
+            <View style={[styles.divider, isDark && styles.dividerDark]} />
+            <MenuLink
               icon="notifications-outline"
               label="Notifications"
               isDark={isDark}
@@ -374,6 +411,12 @@ export default function ProfileScreen() {
               onPress={handlePrivacy}
               isDark={isDark}
             />
+          </View>
+
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Preferences</Text>
+
+          <View style={[styles.menuContainer, isDark && styles.cardDark]}>
+            <CurrencySelector value={currency} onChange={setCurrency} />
           </View>
 
           {isBiometricSupported && (

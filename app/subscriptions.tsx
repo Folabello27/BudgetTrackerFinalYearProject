@@ -1,9 +1,10 @@
+import { useCurrency } from '@/hooks/use-currency';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
     FlatList,
     Platform,
@@ -37,6 +38,7 @@ export default function SubscriptionsScreen() {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
 
+    const { format } = useCurrency();
     const [subs, setSubs] = useState<Subscription[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -119,7 +121,7 @@ export default function SubscriptionsScreen() {
                 </View>
             </View>
             <View style={styles.subRight}>
-                <Text style={[styles.subAmount, isDark && styles.textWhite]}>${item.amount.toFixed(2)}</Text>
+                <Text style={[styles.subAmount, isDark && styles.textWhite]}>{format(item.amount)}</Text>
                 {item.status === 'cancelled' && (
                     <Text style={styles.cancelledLabel}>Cancelled</Text>
                 )}
@@ -151,7 +153,7 @@ export default function SubscriptionsScreen() {
                     <>
                         <View style={[styles.summaryCard, isDark && styles.summaryCardDark]}>
                             <Text style={styles.summaryLabel}>Monthly Average</Text>
-                            <Text style={styles.summaryAmount}>${monthlyTotal.toFixed(2)}</Text>
+                            <Text style={styles.summaryAmount}>{format(monthlyTotal)}</Text>
 
                             <View style={styles.statsDivider} />
 
@@ -161,7 +163,7 @@ export default function SubscriptionsScreen() {
                                     <Text style={styles.statLabel}>Active</Text>
                                 </View>
                                 <View style={styles.statItem}>
-                                    <Text style={styles.statValue}>${yearlyTotal.toFixed(0)}</Text>
+                                    <Text style={styles.statValue}>{format(yearlyTotal)}</Text>
                                     <Text style={styles.statLabel}>Yearly Proj.</Text>
                                 </View>
                                 <View style={styles.statItem}>

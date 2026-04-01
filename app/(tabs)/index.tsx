@@ -1,26 +1,26 @@
 import { useIsland } from '@/components/ui/island-context';
 import { Colors } from '@/constants/Colors';
+import { useCurrency } from '@/hooks/use-currency';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Image,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
+    Animated,
+    Image,
+    Modal,
+    Platform,
+    Pressable,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View
 } from 'react-native';
 
 // --- Types ---
@@ -31,6 +31,15 @@ type Subscription = {
   amount: string;
   due: string;
   icon: string;
+  color: string;
+};
+
+type SavingsGoalCard = {
+  id: string;
+  name: string;
+  target: number;
+  current: number;
+  percentage: number;
   color: string;
 };
 
@@ -53,9 +62,9 @@ type Activity = {
 // --- Mock Data ---
 
 const subscriptions: Subscription[] = [
-  { id: '1', name: 'Netflix', amount: '$15.99', due: 'Tomorrow', icon: 'tv-outline', color: '#FFEBEE' },
-  { id: '2', name: 'Spotify', amount: '$9.99', due: 'In 3 days', icon: 'musical-notes-outline', color: '#E3F2FD' },
-  { id: '3', name: 'Figma', amount: '$12.00', due: 'In 5 days', icon: 'logo-figma', color: '#E8F5E9' },
+  { id: '1', name: 'Netflix', amount: '15.99', due: 'Tomorrow', icon: 'tv-outline', color: '#FFEBEE' },
+  { id: '2', name: 'Spotify', amount: '9.99', due: 'In 3 days', icon: 'musical-notes-outline', color: '#E3F2FD' },
+  { id: '3', name: 'Figma', amount: '12.00', due: 'In 5 days', icon: 'logo-figma', color: '#E8F5E9' },
 ];
 
 // Helper functions for mapping categories to UI
@@ -181,6 +190,27 @@ const SubscriptionCard = ({ item }: { item: Subscription }) => (
   </ScalePressable>
 );
 
+const GoalCard = ({ item, format }: { item: SavingsGoalCard, format: (amount: number) => string }) => (
+  <ScalePressable
+    style={[styles.goalCard, { backgroundColor: item.color, borderColor: item.color }]}
+    onPress={() => router.push('/savings-goals')}
+  >
+    <View style={[styles.goalIcon, { backgroundColor: '#FFF' }]}>
+      <Ionicons name="wallet-outline" size={20} color="#1A1A1A" />
+    </View>
+    <Text style={[styles.goalName, { color: '#1A1A1A' }]} numberOfLines={1}>{item.name}</Text>
+    <View style={styles.goalProgressContainer}>
+      <View style={styles.goalProgressBg}>
+        <View style={[styles.goalProgressFill, { width: `${item.percentage}%` }]} />
+      </View>
+      <Text style={styles.goalPercentage}>{item.percentage.toFixed(0)}%</Text>
+    </View>
+    <Text style={[styles.goalAmount, { color: '#1A1A1A' }]} numberOfLines={1}>
+      {format(item.current)} / {format(item.target)}
+    </Text>
+  </ScalePressable>
+);
+
 const ActivityItem = ({ item, isDark, onPress }: { item: Activity, isDark: boolean, onPress: () => void }) => (
   <ScalePressable
     style={[styles.activityItem, isDark ? styles.cardDark : styles.cardLight]}
@@ -210,6 +240,7 @@ const DetailRow = ({ label, value, last, isDark }: { label: string; value: strin
 
 export default function HomeScreen() {
   const { theme } = useTheme();
+  const { format } = useCurrency();
   const isDark = theme === 'dark';
   const colors = Colors[theme];
 
@@ -217,6 +248,7 @@ export default function HomeScreen() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [dbSubs, setDbSubs] = useState<Subscription[]>([]);
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoalCard[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState(3000);
   const [dailyBudget, setDailyBudget] = useState(100);
   const [monthSpent, setMonthSpent] = useState(0);
@@ -315,7 +347,7 @@ export default function HomeScreen() {
     }
   };
 
-  const fetchRealData = async () => {
+  const fetchRealData = async (isManualRefresh = false) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -416,7 +448,7 @@ export default function HomeScreen() {
           id: tx.id,
           label: tx.note || tx.category || 'Transaction',
           category: tx.category || (isExpense ? 'Expense' : 'Income'),
-          amount: (isExpense ? '-' : '+') + '$' + Math.abs(Number(tx.amount)).toFixed(2),
+          amount: (isExpense ? '-' : '+') + format(Math.abs(Number(tx.amount))),
           amountVal: Number(tx.amount),
           time: tDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
           fullDate: tDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
@@ -435,7 +467,7 @@ export default function HomeScreen() {
           id: sub.id,
           label: sub.name,
           category: 'Subscription',
-          amount: '-$' + Number(sub.amount).toFixed(2),
+          amount: '-' + format(Number(sub.amount)),
           amountVal: Number(sub.amount),
           time: tDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
           fullDate: tDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
@@ -478,10 +510,11 @@ export default function HomeScreen() {
             let dueText = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `In ${diff} days`;
 
             const radarColors = ['#FFE4E6', '#DBEAFE', '#DCFCE7', '#FEF3C7', '#F3E8FF', '#E0E7FF'];
+            const amount = Number(s.amount);
             return {
               id: s.id,
               name: s.name,
-              amount: '$' + Number(s.amount).toFixed(2),
+              amount: format(isNaN(amount) ? 0 : amount),
               due: dueText,
               icon: s.icon,
               color: radarColors[index % radarColors.length]
@@ -489,18 +522,46 @@ export default function HomeScreen() {
           });
         setDbSubs(radarSubs);
       }
+
+      // 7. Fetch Savings Goals
+      try {
+        const { data: goalsData } = await supabase
+          .from('savings_goals')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        if (goalsData) {
+          const goalColors = ['#E8F5E9', '#E3F2FD', '#FFF3E0', '#F3E5F5'];
+          const mappedGoals: SavingsGoalCard[] = goalsData.map((g: any, index: number) => ({
+            id: g.id,
+            name: g.name,
+            target: Number(g.target_amount),
+            current: Number(g.current_amount),
+            percentage: Math.min(100, (Number(g.current_amount) / Number(g.target_amount)) * 100),
+            color: goalColors[index % goalColors.length]
+          }));
+          setSavingsGoals(mappedGoals);
+        }
+      } catch (e) {
+        console.log('Error loading savings goals:', e);
+      }
     } catch (error) {
       console.log('Main fetch error:', error);
     } finally {
       setRefreshing(false);
-      showIsland('success', 'Your finances are up to date!');
+      if (isManualRefresh) {
+        showIsland('success', 'Your finances are up to date!');
+      }
     }
   };
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     showIsland('syncing', 'Syncing your financial dashboard...');
-    fetchRealData();
+    fetchRealData(true);
   }, [showIsland]);
 
   const pickImage = async () => {
@@ -559,69 +620,81 @@ export default function HomeScreen() {
           </ScalePressable>
         </FadeInView>
 
-        {/* Hero Budget Card */}
+        {/* Hero Budget Card - Redesigned */}
         <FadeInView delay={300}>
-          <LinearGradient
-            colors={isDark ? ['#1E1E24', '#121217'] : ['#FFD54F', '#FFC107']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.heroCard, isDark && styles.heroCardDark]}
-          >
-            <View style={styles.heroHeader}>
+          <View style={[styles.balanceCard, isDark && styles.balanceCardDark]}>
+            {/* Top Section: Balance & Trend */}
+            <View style={styles.balanceHeader}>
               <View>
-                <Text style={[styles.heroLabel, { color: isDark ? colors.textSecondary : colors.text }]}>TOTAL BALANCE</Text>
-                <Text style={[styles.heroAmount, { color: colors.text }]}>
-                  ${(monthIncome - monthSpent).toFixed(2)}
+                <Text style={[styles.balanceLabel, isDark && styles.textSecondaryDark]}>Total Balance</Text>
+                <Text style={[styles.balanceAmount, isDark && styles.textWhite]}>
+                  {format(monthIncome - monthSpent)}
                 </Text>
               </View>
-              <View style={[styles.trendBadge, trendType === 'down' && styles.trendBadgeDown, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.4)' }]}>
-                <Ionicons name={trendType === 'up' ? "trending-up" : "trending-down"} size={12} color={isDark ? colors.accent : colors.text} />
-                <Text style={[styles.trendText, { color: isDark ? colors.text : colors.text }]}>{trend}</Text>
+              <View style={[styles.trendPill, trendType === 'down' && styles.trendPillDown]}>
+                <Ionicons 
+                  name={trendType === 'up' ? "trending-up" : "trending-down"} 
+                  size={14} 
+                  color={trendType === 'up' ? '#4CAF50' : '#FF5252'} 
+                />
+                <Text style={[styles.trendPillText, { color: trendType === 'up' ? '#4CAF50' : '#FF5252' }]}>
+                  {trend}
+                </Text>
               </View>
             </View>
 
-            <View style={styles.budgetProgressSection}>
-              <View style={styles.budgetProgressHeader}>
-                <Text style={[styles.budgetProgressLabel, { color: isDark ? colors.textSecondary : colors.text }]}>Today's Progress</Text>
-                <Text style={[styles.budgetProgressValue, { color: colors.text }]}>
-                  ${todaySpent.toFixed(0)} / ${dailyBudget.toFixed(0)}
+            {/* Progress Bar for Daily Budget */}
+            <View style={styles.balanceProgressContainer}>
+              <View style={styles.balanceProgressHeader}>
+                <Text style={[styles.balanceProgressLabel, isDark && styles.textSecondaryDark]}>
+                  Daily Budget
+                </Text>
+                <Text style={[styles.balanceProgressValue, isDark && styles.textWhite]}>
+                  {format(todaySpent)} <Text style={[styles.balanceProgressTotal, isDark && styles.textSecondaryDark]}>/ {format(dailyBudget)}</Text>
                 </Text>
               </View>
-              <View style={[styles.progressBarBg, isDark && { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-                <LinearGradient
-                  colors={todaySpent > dailyBudget ? [colors.error, colors.error] : (isDark ? [colors.accent, colors.accent] : [colors.primary, colors.primary])}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
+              <View style={[styles.balanceProgressTrack, isDark && styles.balanceProgressTrackDark]}>
+                <View 
                   style={[
-                    styles.progressBarFill,
-                    { width: `${Math.min((todaySpent / dailyBudget) * 100, 100)}%` }
-                  ]}
+                    styles.balanceProgressFill, 
+                    { 
+                      width: `${Math.min((todaySpent / dailyBudget) * 100, 100)}%`,
+                      backgroundColor: todaySpent > dailyBudget ? '#FF5252' : (isDark ? '#FFD54F' : '#1A1A1A')
+                    }
+                  ]} 
                 />
               </View>
             </View>
 
-            <View style={[styles.heroFooter, { backgroundColor: colors.glass }]}>
-              <View style={styles.statMiniItem}>
-                <View style={[styles.statMiniIcon, { backgroundColor: 'rgba(76, 175, 80, 0.15)' }]}>
-                  <Ionicons name="arrow-down-outline" size={14} color={colors.success} />
+            {/* Income & Expense Row */}
+            <View style={styles.balanceStats}>
+              <View style={styles.balanceStatItem}>
+                <View style={styles.balanceStatIconWrap}>
+                  <View style={[styles.balanceStatIcon, { backgroundColor: '#4CAF5015' }]}>
+                    <Ionicons name="arrow-down" size={16} color="#4CAF50" />
+                  </View>
                 </View>
                 <View>
-                  <Text style={[styles.statMiniLabel, { color: isDark ? colors.textSecondary : colors.text }]}>Income</Text>
-                  <Text style={[styles.statMiniValue, { color: colors.text }]}>+${monthIncome.toFixed(0)}</Text>
+                  <Text style={[styles.balanceStatLabel, isDark && styles.textSecondaryDark]}>Income</Text>
+                  <Text style={[styles.balanceStatValue, isDark && styles.textWhite]}>{format(monthIncome)}</Text>
                 </View>
               </View>
-              <View style={[styles.statMiniDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]} />
-              <View style={styles.statMiniItem}>
-                <View style={[styles.statMiniIcon, { backgroundColor: 'rgba(255, 82, 82, 0.15)' }]}>
-                  <Ionicons name="arrow-up-outline" size={14} color={colors.error} />
+              
+              <View style={styles.balanceStatDivider} />
+              
+              <View style={styles.balanceStatItem}>
+                <View style={styles.balanceStatIconWrap}>
+                  <View style={[styles.balanceStatIcon, { backgroundColor: '#FF525215' }]}>
+                    <Ionicons name="arrow-up" size={16} color="#FF5252" />
+                  </View>
                 </View>
                 <View>
-                  <Text style={[styles.statMiniLabel, { color: isDark ? colors.textSecondary : colors.text }]}>Expense</Text>
-                  <Text style={[styles.statMiniValue, { color: colors.text }]}>-${monthSpent.toFixed(0)}</Text>
+                  <Text style={[styles.balanceStatLabel, isDark && styles.textSecondaryDark]}>Expenses</Text>
+                  <Text style={[styles.balanceStatValue, isDark && styles.textWhite]}>{format(monthSpent)}</Text>
                 </View>
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </FadeInView>
 
         {/* Subscriptions Section */}
@@ -646,6 +719,32 @@ export default function HomeScreen() {
               ))
             ) : (
               <Text style={{ color: '#9E9E9E', marginLeft: 4 }}>No subscriptions tracked yet.</Text>
+            )}
+          </ScrollView>
+        </FadeInView>
+
+        {/* Savings Goals Section */}
+        <FadeInView delay={600} style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Savings Goals</Text>
+            <Pressable onPress={() => router.push('/savings-goals')}>
+              <Text style={styles.seeAll}>See all</Text>
+            </Pressable>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.subListContainer}
+          >
+            {savingsGoals.length > 0 ? (
+              savingsGoals.map((item) => (
+                <View key={item.id} style={{ marginRight: 16 }}>
+                  <GoalCard item={item} format={format} />
+                </View>
+              ))
+            ) : (
+              <Text style={{ color: '#9E9E9E', marginLeft: 4 }}>No savings goals yet. Create one!</Text>
             )}
           </ScrollView>
         </FadeInView>
@@ -825,6 +924,142 @@ const styles = StyleSheet.create({
   bellDark: {
     backgroundColor: '#1A1A1A',
     borderColor: '#333',
+  },
+  // New Balance Card Styles
+  balanceCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  balanceCardDark: {
+    backgroundColor: '#1A1A1A',
+    borderColor: '#333',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+  },
+  balanceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  balanceLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#71717A',
+    marginBottom: 4,
+  },
+  textSecondaryDark: {
+    color: '#A1A1AA',
+  },
+  balanceAmount: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  trendPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#F0FDF4',
+    gap: 4,
+  },
+  trendPillDown: {
+    backgroundColor: '#FEF2F2',
+  },
+  trendPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  balanceProgressContainer: {
+    marginBottom: 20,
+  },
+  balanceProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  balanceProgressLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#71717A',
+  },
+  balanceProgressValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  balanceProgressTotal: {
+    fontWeight: '400',
+    color: '#A1A1AA',
+  },
+  balanceProgressTrack: {
+    height: 6,
+    backgroundColor: '#F4F4F5',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  balanceProgressTrackDark: {
+    backgroundColor: '#27272A',
+  },
+  balanceProgressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  balanceStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F4F4F5',
+  },
+  balanceStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  balanceStatIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  balanceStatIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  balanceStatLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#71717A',
+    marginBottom: 2,
+  },
+  balanceStatValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  balanceStatDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: '#F4F4F5',
+    marginHorizontal: 16,
   },
   heroCard: {
     borderRadius: 32,
@@ -1029,6 +1264,58 @@ const styles = StyleSheet.create({
   subAmount: {
     fontSize: 16,
     fontWeight: '700',
+    color: '#1A1A1A',
+    marginTop: 4,
+  },
+  goalCard: {
+    width: 160,
+    height: 180,
+    padding: 16,
+    paddingVertical: 20,
+    borderRadius: 24,
+    gap: 8,
+    borderWidth: 1,
+  },
+  goalIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  goalName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  goalProgressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  goalProgressBg: {
+    flex: 1,
+    height: 6,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  goalProgressFill: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 3,
+  },
+  goalPercentage: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4CAF50',
+    width: 35,
+  },
+  goalAmount: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#1A1A1A',
     marginTop: 4,
   },

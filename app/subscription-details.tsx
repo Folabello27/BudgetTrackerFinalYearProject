@@ -1,3 +1,4 @@
+import { useCurrency } from '@/hooks/use-currency';
 import { NotificationService } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
@@ -5,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Alert,
     Dimensions,
@@ -39,6 +40,7 @@ const AVAILABLE_COLORS = [
 
 export default function SubscriptionDetailsScreen() {
     const { theme } = useTheme();
+    const { format } = useCurrency();
     const isDark = theme === 'dark';
     const params = useLocalSearchParams();
 
@@ -276,8 +278,7 @@ export default function SubscriptionDetailsScreen() {
                     </View>
                     <Text style={[styles.subName, isDark && styles.textWhite]}>{sub.name}</Text>
                     <View style={styles.amountContainer}>
-                        <Text style={[styles.currency, isDark && styles.textWhite]}>$</Text>
-                        <Text style={[styles.amountValue, isDark && styles.textWhite]}>{sub.amount.toFixed(2)}</Text>
+                        <Text style={[styles.amountValue, isDark && styles.textWhite]}>{format(sub.amount)}</Text>
                         <Text style={styles.periodLabel}>/{sub.period === 'MO' ? 'month' : 'year'}</Text>
                     </View>
 
@@ -305,7 +306,7 @@ export default function SubscriptionDetailsScreen() {
                         <View style={styles.overviewRow}>
                             <View style={styles.overviewItem}>
                                 <Text style={styles.overviewLabel}>Yearly Cost</Text>
-                                <Text style={styles.overviewValue}>${(sub.period === 'MO' ? sub.amount * 12 : sub.amount).toFixed(2)}</Text>
+                                <Text style={styles.overviewValue}>{format(sub.period === 'MO' ? sub.amount * 12 : sub.amount)}</Text>
                             </View>
                             <View style={styles.verticalDivider} />
                             <View style={styles.overviewItem}>

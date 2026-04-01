@@ -1,20 +1,21 @@
+import { useCurrency } from '@/hooks/use-currency';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Modal,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from 'react-native';
 
 // --- Types ---
@@ -53,6 +54,7 @@ const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
 export default function TransactionsScreen() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { format } = useCurrency();
 
   const [txs, setTxs] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,7 +209,7 @@ export default function TransactionsScreen() {
                   <Text style={styles.category} numberOfLines={1}>{item.note || 'No note'}</Text>
                 </View>
                 <Text style={[styles.amount, item.type === 'income' ? styles.inflow : (isDark ? styles.textWhite : styles.outflow)]}>
-                  {item.type === 'income' ? '+' : '-'}${item.amount.toFixed(2)}
+                  {item.type === 'income' ? '+' : '-'}{format(item.amount)}
                 </Text>
               </Pressable>
             </View>
@@ -235,7 +237,7 @@ export default function TransactionsScreen() {
                     </View>
                     <Text style={[styles.modalMerchant, isDark && styles.textWhite]}>{selectedTx.category}</Text>
                     <Text style={[styles.modalAmount, selectedTx.type === 'income' ? styles.inflow : (isDark ? styles.textWhite : styles.outflow)]}>
-                      {selectedTx.type === 'income' ? '+' : '-'}${selectedTx.amount.toFixed(2)}
+                      {selectedTx.type === 'income' ? '+' : '-'}{format(selectedTx.amount)}
                     </Text>
                   </View>
 

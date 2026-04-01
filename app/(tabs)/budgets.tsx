@@ -1,3 +1,4 @@
+import { useCurrency } from '@/hooks/use-currency';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,18 +6,18 @@ import { useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  Animated,
-  Modal,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    Animated,
+    Modal,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const ScalePressable = ({ children, onPress, style }: { children: React.ReactNode, onPress?: () => void, style?: any }) => {
@@ -79,11 +80,12 @@ export default function BudgetsScreen() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [selectedMonth] = useState('February');
-  const [loading, setLoading] = useState(true);
+  const { format } = useCurrency();
   const [monthlyLimit, setMonthlyLimit] = useState(0);
   const [dailyLimit, setDailyLimit] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
   const [categories, setCategories] = useState<BudgetCategory[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Modal state
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -249,7 +251,7 @@ export default function BudgetsScreen() {
               </ScalePressable>
             </View>
 
-            <Text style={styles.totalAmount}>${monthlyLimit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
+            <Text style={styles.totalAmount}>{format(monthlyLimit)}</Text>
 
             <View style={styles.cardDivider} />
 
@@ -257,7 +259,7 @@ export default function BudgetsScreen() {
               <View>
                 <Text style={styles.footerLabel}>Daily Goal</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Text style={styles.footerValueWhite}>${dailyLimit.toFixed(2)}</Text>
+                  <Text style={styles.footerValueWhite}>{format(dailyLimit)}</Text>
                   <ScalePressable
                     onPress={() => {
                       setModalType('daily');
@@ -272,7 +274,7 @@ export default function BudgetsScreen() {
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={styles.footerLabel}>Left to Spend</Text>
-                <Text style={styles.footerValueYellow}>${Math.max(monthlyLimit - totalSpent, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
+                <Text style={styles.footerValueYellow}>{format(Math.max(monthlyLimit - totalSpent, 0))}</Text>
               </View>
             </View>
           </View>
@@ -304,7 +306,7 @@ export default function BudgetsScreen() {
                         <Text style={[styles.catName, isDark && styles.textWhite]}>{cat.name}</Text>
                         <Text style={[styles.catPercent, isDark && styles.textWhite]}>{cat.percent}%</Text>
                       </View>
-                      <Text style={styles.catSpentText}>${cat.spent.toFixed(0)} spent of ${cat.total.toFixed(0)}</Text>
+                      <Text style={styles.catSpentText}>{format(cat.spent)} spent of {format(cat.total)}</Text>
                     </View>
                   </View>
 
@@ -316,9 +318,9 @@ export default function BudgetsScreen() {
                   {/* Footer Info */}
                   <View style={styles.catFooter}>
                     <View style={[styles.leftBadge, isDark && styles.badgeDark]}>
-                      <Text style={[styles.leftText, isDark && styles.textWhite]}>${cat.left.toFixed(0)} left</Text>
+                      <Text style={[styles.leftText, isDark && styles.textWhite]}>{format(cat.left)} left</Text>
                     </View>
-                    <Text style={styles.dailyAvg}>Daily avg: ${cat.dailyAvg.toFixed(0)}</Text>
+                    <Text style={styles.dailyAvg}>Daily avg: {format(cat.dailyAvg)}</Text>
                   </View>
                 </ScalePressable>
               </FadeInView>

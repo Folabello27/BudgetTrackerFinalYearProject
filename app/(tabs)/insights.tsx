@@ -1,3 +1,5 @@
+import { useCurrency } from '@/hooks/use-currency';
+import { exportService } from '@/lib/export';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,18 +7,18 @@ import { useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Animated,
-  FlatList,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Animated,
+    FlatList,
+    Modal,
+    Platform,
+    Pressable,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const ScalePressable = ({ children, onPress, style }: { children: React.ReactNode, onPress?: () => void, style?: any }) => {
@@ -87,6 +89,7 @@ const CATEGORY_STYLES: Record<string, { color: string; icon: keyof typeof Ionico
 export default function InsightsScreen() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { format } = useCurrency();
 
   const [period, setPeriod] = useState<Period>('Monthly');
   const [selectedLabel, setSelectedLabel] = useState(MONTHS[new Date().getMonth()]);
@@ -96,14 +99,16 @@ export default function InsightsScreen() {
   const [loading, setLoading] = useState(true);
   const [rotation] = useState(new Animated.Value(0));
   const [opacity] = useState(new Animated.Value(1));
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const [currentData, setCurrentData] = useState<InsightData>({
     label: '',
-    total: '$0.00',
+    total: format(0),
     healthy: true,
-    avgDaily: '$0.00',
-    highest: '$0.00',
+    avgDaily: format(0),
+    highest: format(0),
     categories: []
   });
 
@@ -162,7 +167,7 @@ export default function InsightsScreen() {
         return {
           id: catName,
           name: catName,
-          amount: `$${val.toFixed(2)}`,
+          amount: format(val),
           amountVal: val,
           color: style.color,
           percent: totalVal > 0 ? val / totalVal : 0,
@@ -194,10 +199,10 @@ export default function InsightsScreen() {
 
       setCurrentData({
         label: selectedLabel,
-        total: `$${totalVal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        total: format(totalVal),
         healthy: isHealthy,
-        avgDaily: `$${(totalVal / days).toFixed(2)}`,
-        highest: `$${highestVal.toFixed(2)}`,
+        avgDaily: format(totalVal / days),
+        highest: format(highestVal),
         categories
       });
     } catch (e) {
@@ -234,6 +239,26 @@ export default function InsightsScreen() {
     if (period === 'Yearly') return ['2024', '2025', '2026'];
     return ['Current Week'];
   }, [period]);
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await exportService.downloadReport(user.id, {
+        format: 'csv',
+        includeIncome: true,
+        includeExpenses: true
+      });
+
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Export error:', error);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, isDark && styles.bgDark]}>
@@ -279,6 +304,15 @@ export default function InsightsScreen() {
             <Ionicons name="chevron-down" size={16} color={isDark ? "#FFF" : "#1A1A1A"} />
           </TouchableOpacity>
         </View>
+
+        {/* Export Button */}
+        <TouchableOpacity
+          style={[styles.exportBtn, isDark && styles.exportBtnDark]}
+          onPress={() => setShowExportModal(true)}
+        >
+          <Ionicons name="download-outline" size={20} color={isDark ? "#FFF" : "#1A1A1A"} />
+          <Text style={[styles.exportText, isDark && styles.textWhite]}>Export</Text>
+        </TouchableOpacity>
 
         {/* Period Switcher */}
         <View style={[styles.segmentControl, isDark && styles.segmentControlDark]}>
@@ -460,6 +494,31 @@ export default function InsightsScreen() {
             />
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Export Modal */}
+      <Modal visible={showExportModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.exportModalContent, isDark && styles.modalContentDark]}>
+            <Text style={[styles.modalTitle, isDark && styles.textWhite]}>Export Report</Text>
+            <Text style={styles.modalSubtitle}>Download your transaction history as CSV</Text>
+            <TouchableOpacity
+              style={[styles.exportActionBtn, exporting && styles.exportingBtn]}
+              onPress={handleExport}
+              disabled={exporting}
+            >
+              <Text style={styles.exportActionText}>
+                {exporting ? 'Exporting...' : 'Download CSV'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => setShowExportModal(false)}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
     </SafeAreaView>
@@ -865,4 +924,172 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     fontWeight: '700',
   },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  exportBtnDark: {
+    backgroundColor: '#1A1A1A'
+  },
+  exportText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1A1A1A'
+  },
+  healthCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4
+  },
+  healthGradient: {
+    alignItems: 'center',
+    padding: 24,
+    paddingTop: 28
+  },
+  scoreCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4
+  },
+  scoreText: {
+    fontSize: 40,
+    fontWeight: '800'
+  },
+  scoreGood: {
+    color: '#4CAF50'
+  },
+  scoreFair: {
+    color: '#FFD54F'
+  },
+  scorePoor: {
+    color: '#FF5252'
+  },
+  scoreLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 2
+  },
+  healthDesc: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    textAlign: 'center'
+  },
+  factorsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 16,
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0'
+  },
+  factor: {
+    alignItems: 'center'
+  },
+  factorValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A'
+  },
+  factorLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4
+  },
+  insightsSection: {
+    gap: 12
+  },
+  insightCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
+    borderRadius: 16,
+    gap: 12
+  },
+  insightContent: {
+    flex: 1,
+    gap: 4
+  },
+  insightTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2
+  },
+  insightMessage: {
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20
+  },
+  insightMetric: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginTop: 4
+  },
+  exportModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 24
+  },
+  exportActionBtn: {
+    backgroundColor: '#FFD54F',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  exportingBtn: {
+    opacity: 0.7
+  },
+  exportActionText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A'
+  },
+  cancelBtn: {
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  cancelText: {
+    fontSize: 16,
+    color: '#666'
+  }
 });

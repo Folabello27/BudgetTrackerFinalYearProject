@@ -1,5 +1,6 @@
 import { IslandProvider } from '@/components/ui/island-context';
 import { Colors } from '@/constants/theme';
+import { CurrencyProvider } from '@/lib/currency-context';
 import { NotificationService } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 import { ThemeProvider as AppThemeProvider, useTheme } from '@/lib/theme-context';
@@ -7,7 +8,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import * as Notifications from 'expo-notifications';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 export const unstable_settings = {
@@ -81,9 +82,11 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <AppThemeProvider>
-      <IslandProvider>
-        <RootLayoutContent />
-      </IslandProvider>
+      <CurrencyProvider>
+        <IslandProvider>
+          <RootLayoutContent />
+        </IslandProvider>
+      </CurrencyProvider>
     </AppThemeProvider>
   );
 }

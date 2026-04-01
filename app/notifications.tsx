@@ -3,7 +3,7 @@ import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -19,7 +19,7 @@ const MOCK_NOTIFICATIONS: AppNotification[] = [
     {
         id: 'mock-1',
         title: 'Upcoming Bill',
-        message: 'Your Netflix subscription ($15.99) is due tomorrow.',
+        message: 'Your Netflix subscription (amount) is due tomorrow.',
         time: '2h ago',
         type: 'subscription',
         isRead: false,
