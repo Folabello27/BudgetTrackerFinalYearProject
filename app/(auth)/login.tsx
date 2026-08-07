@@ -1,18 +1,22 @@
 import { BiometricService } from '@/lib/biometrics';
-import { supabase } from '@/lib/supabase';
+import { setSessionFromOAuthRedirect, supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import * as AuthSession from 'expo-auth-session';
+import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
 } from 'react-native';
 
 export default function LoginScreen() {
@@ -96,34 +100,33 @@ export default function LoginScreen() {
   async function handleGoogleSignIn() {
     try {
       setLoading(true);
+      const redirectTo = Constants.appOwnership === 'expo'
+        ? AuthSession.makeRedirectUri({ useProxy: true })
+        : Linking.createURL('auth-callback', { scheme: 'budgettracker' });
+      console.log('Google OAuth redirect URI:', redirectTo);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'budgettracker://google-auth',
+          redirectTo,
+          skipBrowserRedirect: true,
         },
       });
       if (error) throw error;
-      // Note: Full OAuth flow in Expo requires expo-auth-session
+      if (data?.url) {
+        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+        const callbackUrl = result.type === 'success' && 'url' in result ? result.url : await Linking.getInitialURL();
+        if (callbackUrl) {
+          console.log('Google auth callback URL:', callbackUrl);
+          await setSessionFromOAuthRedirect(callbackUrl);
+          router.replace('/(tabs)');
+          return;
+        }
+        throw new Error(`Google sign-in failed: ${result.type}`);
+      } else {
+        throw new Error('Unable to start Google sign-in flow.');
+      }
     } catch (error: any) {
       setStatus({ type: 'error', message: `Google Sign-In: ${error.message}` });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleAppleSignIn() {
-    try {
-      setLoading(true);
-      // Note: Native Apple Auth requires expo-apple-authentication package
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: 'budgettracker://apple-auth',
-        },
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      setStatus({ type: 'error', message: `Apple Sign-In: ${error.message}` });
     } finally {
       setLoading(false);
     }
@@ -138,9 +141,13 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
           <View style={styles.header}>
+            <View style={styles.brandChip}>
+              <Ionicons name="wallet-outline" size={18} color="#1A1A1A" />
+              <Text style={styles.brandText}>Budget Tracker</Text>
+            </View>
             <Text style={styles.title}>Welcome back</Text>
             <Text style={styles.subtitle}>
-              Please enter your details to access your personalized financial dashboard.
+              Sign in to review your spending, goals, and financial habits in one place.
             </Text>
           </View>
 
@@ -251,10 +258,6 @@ export default function LoginScreen() {
               <Ionicons name="logo-google" size={22} color="#000" style={{ marginRight: 8 }} />
               <Text style={styles.socialButtonText}>Google</Text>
             </Pressable>
-            <Pressable style={styles.socialButton} onPress={handleAppleSignIn} disabled={loading}>
-              <Ionicons name="logo-apple" size={22} color="#000" style={{ marginRight: 8 }} />
-              <Text style={styles.socialButtonText}>Apple</Text>
-            </Pressable>
           </View>
 
           {/* Footer */}
@@ -282,7 +285,23 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 40,
+    marginBottom: 32,
+  },
+  brandChip: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#EDE9FE',
+    marginBottom: 16,
+  },
+  brandText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#7C3AED',
   },
   title: {
     fontSize: 32,
@@ -330,17 +349,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotText: {
-    color: '#FFD54F', // Yellow
+    color: '#1A1A1A',
     fontWeight: '700',
     fontSize: 14,
   },
   button: {
-    backgroundColor: '#FFD54F', // Yellow
+    backgroundColor: '#7C3AED',
     height: 56,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#FFD54F',
+    shadowColor: '#7C3AED',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -350,7 +369,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonText: {
-    color: '#1A1A1A',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -403,7 +422,7 @@ const styles = StyleSheet.create({
   signupLink: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFD54F', // Yellow
+    color: '#1A1A1A',
   },
   biometricButton: {
     flexDirection: 'row',

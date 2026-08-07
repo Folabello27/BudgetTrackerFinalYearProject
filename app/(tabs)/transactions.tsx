@@ -130,7 +130,12 @@ export default function TransactionsScreen() {
       <StatusBar style={isDark ? "light" : "dark"} />
 
       <View style={styles.header}>
-        <Text style={[styles.title, isDark && styles.textWhite]}>History</Text>
+        <View style={styles.headerIntro}>
+          <View style={styles.titleBadge}>
+            <Ionicons name="time-outline" size={16} color="#1A1A1A" />
+          </View>
+          <Text style={[styles.title, isDark && styles.textWhite]}>History</Text>
+        </View>
 
         {/* 1. Search Bar */}
         <View style={[styles.searchContainer, isDark && styles.searchDark]}>
@@ -149,7 +154,7 @@ export default function TransactionsScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
             {MONTHS.map((m) => (
               <Pressable key={m} onPress={() => setActiveMonth(m)} style={[styles.monthPill, activeMonth === m && (isDark ? styles.activePillDark : styles.activePill)]}>
-                <Text style={[styles.pillText, activeMonth === m && (isDark ? styles.textWhite : styles.activePillText)]}>{m}</Text>
+                <Text style={[styles.pillText, isDark && styles.pillTextDark, activeMonth === m && (isDark ? styles.textWhite : styles.activePillText)]}>{m}</Text>
               </Pressable>
             ))}
           </ScrollView>
@@ -169,7 +174,7 @@ export default function TransactionsScreen() {
                   )
                 ]}
               >
-                <Text style={[styles.catText, activeType === type && styles.activeCatText]}>
+                <Text style={[styles.catText, isDark && styles.catTextDark, activeType === type && styles.activeCatText]}>
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </Text>
               </Pressable>
@@ -177,7 +182,7 @@ export default function TransactionsScreen() {
             <View style={styles.vDivider} />
             {CATEGORIES.map((cat) => (
               <Pressable key={cat} onPress={() => setActiveCategory(cat)} style={[styles.catPill, isDark && styles.catPillDark, activeCategory === cat && (isDark ? styles.activeCatPillDark : styles.activeCatPill)]}>
-                <Text style={[styles.catText, activeCategory === cat && styles.activeCatText]}>{cat}</Text>
+                <Text style={[styles.catText, isDark && styles.catTextDark, activeCategory === cat && styles.activeCatText]}>{cat}</Text>
               </Pressable>
             ))}
           </ScrollView>
@@ -206,7 +211,7 @@ export default function TransactionsScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.merchant, isDark && styles.textWhite]}>{item.category}</Text>
-                  <Text style={styles.category} numberOfLines={1}>{item.note || 'No note'}</Text>
+                  <Text style={[styles.category, isDark && styles.categoryDark]} numberOfLines={1}>{item.note || 'No note'}</Text>
                 </View>
                 <Text style={[styles.amount, item.type === 'income' ? styles.inflow : (isDark ? styles.textWhite : styles.outflow)]}>
                   {item.type === 'income' ? '+' : '-'}{format(item.amount)}
@@ -216,7 +221,7 @@ export default function TransactionsScreen() {
           )}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No transactions found.</Text>
+              <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>No transactions found.</Text>
             </View>
           }
         />
@@ -263,7 +268,7 @@ export default function TransactionsScreen() {
 
 const DetailRow = ({ label, value, last, isDark }: { label: string; value: string; last?: boolean; isDark?: boolean }) => (
   <View style={[styles.detailRow, !last && styles.detailBorder, !last && isDark && styles.detailBorderDark]}>
-    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={[styles.detailLabel, isDark && styles.detailLabelDark]}>{label}</Text>
     <Text style={[styles.detailValue, isDark && styles.textWhite]}>{value}</Text>
   </View>
 );
@@ -272,6 +277,15 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFFFF' },
   bgDark: { backgroundColor: '#0F0F12' },
   header: { paddingHorizontal: 24, paddingTop: 10, gap: 16 },
+  headerIntro: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  titleBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#F4F7E8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   title: { color: '#1A1A1A', fontSize: 28, fontWeight: '700' },
   textWhite: { color: '#FFFFFF' },
   textBlack: { color: '#000' },
@@ -291,15 +305,17 @@ const styles = StyleSheet.create({
   activeIncPill: { backgroundColor: '#48BB78' },
   activeExpPill: { backgroundColor: '#F56565' },
   catText: { fontSize: 13, fontWeight: '600', color: '#9E9E9E' },
+  catTextDark: { color: '#D1D5DB' },
   activeCatText: { color: '#FFF' },
   listContent: { padding: 24, paddingBottom: 40 },
   groupHeader: { color: '#9E9E9E', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginBottom: 12, marginTop: 10 },
-  item: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 16, borderRadius: 20, marginBottom: 8, borderWidth: 1, borderColor: '#F5F5F5' },
+  item: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 16, borderRadius: 20, marginBottom: 8, borderWidth: 1, borderColor: '#F5F5F5', shadowColor: '#000', shadowOpacity: 0.03, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
   itemDark: { backgroundColor: '#1A1A1A', borderColor: '#333' },
   iconBox: { width: 42, height: 42, borderRadius: 12, backgroundColor: '#1A1A1A', justifyContent: 'center', alignItems: 'center', marginRight: 16 },
   iconBoxDark: { backgroundColor: '#333' },
   merchant: { color: '#1A1A1A', fontSize: 15, fontWeight: '600' },
   category: { color: '#71717A', fontSize: 12, marginTop: 2 },
+  categoryDark: { color: '#D1D5DB' },
   amount: { fontSize: 15, fontWeight: '700' },
   inflow: { color: '#4CAF50' },
   outflow: { color: '#1A1A1A' },
@@ -317,12 +333,23 @@ const styles = StyleSheet.create({
   detailBorder: { borderBottomWidth: 1, borderColor: '#F0F0F0' },
   detailBorderDark: { borderColor: '#333' },
   detailLabel: { color: '#71717A', fontSize: 14, fontWeight: '500' },
+  detailLabelDark: { color: '#D1D5DB' },
   detailValue: { color: '#1A1A1A', fontSize: 14, fontWeight: '700', flex: 1, textAlign: 'right', marginLeft: 20 },
+  emptyTextDark: { color: '#D1D5DB' },
   closeBtn: { backgroundColor: '#1A1A1A', padding: 18, borderRadius: 18, alignItems: 'center' },
   closeBtnDark: { backgroundColor: '#FFF' },
   closeBtnText: { color: '#FFF', fontWeight: '800', fontSize: 16 },
-  emptyState: { alignItems: 'center', marginTop: 100 },
-  emptyText: { color: '#9E9E9E', fontSize: 15 },
+  emptyState: { alignItems: 'center', marginTop: 80, gap: 12, paddingHorizontal: 24 },
+  emptyStateIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  emptyText: { color: '#1A1A1A', fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  emptySubtext: { color: '#71717A', fontSize: 13, textAlign: 'center' },
   vDivider: {
     width: 1,
     height: 20,

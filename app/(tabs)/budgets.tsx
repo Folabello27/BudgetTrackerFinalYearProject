@@ -273,7 +273,7 @@ export default function BudgetsScreen() {
                 </View>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={styles.footerLabel}>Left to Spend</Text>
+                <Text style={[styles.footerLabel, isDark && styles.footerLabelDark]}>Left to Spend</Text>
                 <Text style={styles.footerValueYellow}>{format(Math.max(monthlyLimit - totalSpent, 0))}</Text>
               </View>
             </View>
@@ -306,7 +306,7 @@ export default function BudgetsScreen() {
                         <Text style={[styles.catName, isDark && styles.textWhite]}>{cat.name}</Text>
                         <Text style={[styles.catPercent, isDark && styles.textWhite]}>{cat.percent}%</Text>
                       </View>
-                      <Text style={styles.catSpentText}>{format(cat.spent)} spent of {format(cat.total)}</Text>
+                      <Text style={[styles.catSpentText, isDark && styles.catSpentTextDark]}>{format(cat.spent)} spent of {format(cat.total)}</Text>
                     </View>
                   </View>
 
@@ -320,15 +320,15 @@ export default function BudgetsScreen() {
                     <View style={[styles.leftBadge, isDark && styles.badgeDark]}>
                       <Text style={[styles.leftText, isDark && styles.textWhite]}>{format(cat.left)} left</Text>
                     </View>
-                    <Text style={styles.dailyAvg}>Daily avg: {format(cat.dailyAvg)}</Text>
+                    <Text style={[styles.dailyAvg, isDark && styles.dailyAvgDark]}>Daily avg: {format(cat.dailyAvg)}</Text>
                   </View>
                 </ScalePressable>
               </FadeInView>
             ))
           ) : (
             <View style={{ alignItems: 'center', padding: 40 }}>
-              <Ionicons name="receipt-outline" size={48} color={isDark ? "#333" : "#E0E0E0"} />
-              <Text style={{ color: '#9E9E9E', marginTop: 12 }}>No transactions for this month yet.</Text>
+              <Ionicons name="receipt-outline" size={48} color={isDark ? "#888" : "#E0E0E0"} />
+              <Text style={[styles.emptyStateText, isDark && styles.emptyStateTextDark, { marginTop: 12 }]}>No transactions for this month yet.</Text>
             </View>
           )}
         </View>
@@ -488,6 +488,9 @@ const styles = StyleSheet.create({
     color: '#9E9E9E',
     marginBottom: 4,
   },
+  footerLabelDark: {
+    color: '#D1D5DB',
+  },
   footerValueWhite: {
     fontSize: 18,
     fontWeight: '700',
@@ -524,6 +527,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#1A1A1A',
+  },
+  filterTextDark: {
+    color: '#F8FAFC',
   },
   filterBtnDark: {
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -576,6 +582,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#9E9E9E',
   },
+  catSpentTextDark: {
+    color: '#D1D5DB',
+  },
   progressBg: {
     height: 8,
     backgroundColor: '#F5F5F5',
@@ -611,6 +620,9 @@ const styles = StyleSheet.create({
   dailyAvg: {
     fontSize: 12,
     color: '#9E9E9E',
+  },
+  dailyAvgDark: {
+    color: '#D1D5DB',
   },
 
   // Modal

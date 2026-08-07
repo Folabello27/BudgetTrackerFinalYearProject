@@ -164,9 +164,13 @@ const FadeInView = ({ children, delay = 0, style }: { children: React.ReactNode,
   );
 };
 
-const SubscriptionCard = ({ item }: { item: Subscription }) => (
+const SubscriptionCard = ({ item, isDark }: { item: Subscription; isDark: boolean }) => (
   <ScalePressable
-    style={[styles.subCard, { backgroundColor: item.color, borderColor: item.color }]}
+    style={[
+      styles.subCard,
+      isDark && styles.subCardDark,
+      { backgroundColor: isDark ? '#18181B' : '#FFFFFF', borderColor: item.color }
+    ]}
     onPress={() => router.push({
       pathname: '/subscription-details',
       params: {
@@ -181,33 +185,48 @@ const SubscriptionCard = ({ item }: { item: Subscription }) => (
       }
     })}
   >
-    <View style={[styles.subIcon, { backgroundColor: '#FFF' }]}>
-      <Ionicons name={item.icon as any} size={20} color="#1A1A1A" />
+    <View style={styles.subRow}>
+      <View style={[styles.subIcon, { backgroundColor: item.color }]}> 
+        <Ionicons name={item.icon as any} size={20} color="#FFFFFF" />
+      </View>
+      <View style={styles.subContent}>
+        <Text style={[styles.subName, isDark && styles.subNameDark]} numberOfLines={1}>{item.name}</Text>
+        <Text style={[styles.subDue, isDark && styles.subDueDark]} numberOfLines={1}>{item.due}</Text>
+      </View>
+      <Text style={[styles.subAmount, { color: item.color }]}>{item.amount}</Text>
     </View>
-    <Text style={[styles.subName, { color: '#1A1A1A' }]} numberOfLines={1}>{item.name}</Text>
-    <Text style={styles.subDue} numberOfLines={1}>{item.due}</Text>
-    <Text style={[styles.subAmount, { color: '#1A1A1A' }]} numberOfLines={1}>{item.amount}</Text>
   </ScalePressable>
 );
 
-const GoalCard = ({ item, format }: { item: SavingsGoalCard, format: (amount: number) => string }) => (
+const GoalCard = ({ item, format, isDark }: { item: SavingsGoalCard; format: (amount: number) => string; isDark: boolean }) => (
   <ScalePressable
-    style={[styles.goalCard, { backgroundColor: item.color, borderColor: item.color }]}
+    style={[
+      styles.goalCard,
+      isDark && styles.goalCardDark,
+      { backgroundColor: isDark ? '#18181B' : '#FFFFFF', borderColor: item.color }
+    ]}
     onPress={() => router.push('/savings-goals')}
   >
-    <View style={[styles.goalIcon, { backgroundColor: '#FFF' }]}>
-      <Ionicons name="wallet-outline" size={20} color="#1A1A1A" />
-    </View>
-    <Text style={[styles.goalName, { color: '#1A1A1A' }]} numberOfLines={1}>{item.name}</Text>
-    <View style={styles.goalProgressContainer}>
-      <View style={styles.goalProgressBg}>
-        <View style={[styles.goalProgressFill, { width: `${item.percentage}%` }]} />
+    <View style={styles.goalRow}> 
+      <View style={[styles.goalIcon, { backgroundColor: item.color }]}> 
+        <Ionicons name="wallet-outline" size={20} color="#FFFFFF" />
       </View>
-      <Text style={styles.goalPercentage}>{item.percentage.toFixed(0)}%</Text>
+      <View style={styles.goalContent}>
+        <Text style={[styles.goalName, isDark && styles.goalNameDark]} numberOfLines={1}>{item.name}</Text>
+        <View style={styles.goalProgressContainer}>
+          <View style={styles.goalProgressBg}>
+            <View style={[styles.goalProgressFill, { width: `${item.percentage}%`, backgroundColor: item.color }]} />
+          </View>
+          <Text style={[styles.goalPercentage, { color: item.color }]}>{item.percentage.toFixed(0)}%</Text>
+        </View>
+      </View>
+      <View style={styles.goalAmountWrapper}>
+        <Text style={[styles.goalAmount, { color: item.color }]} numberOfLines={1}>
+          {format(item.current)}
+        </Text>
+        <Text style={[styles.goalTarget, isDark && styles.goalTargetDark]}>{format(item.target)}</Text>
+      </View>
     </View>
-    <Text style={[styles.goalAmount, { color: '#1A1A1A' }]} numberOfLines={1}>
-      {format(item.current)} / {format(item.target)}
-    </Text>
   </ScalePressable>
 );
 
@@ -217,12 +236,12 @@ const ActivityItem = ({ item, isDark, onPress }: { item: Activity, isDark: boole
     onPress={onPress}
   >
     <View style={styles.activityLeft}>
-      <View style={[styles.activityIcon, { backgroundColor: item.bg }]}>
-        <Ionicons name={item.icon} size={20} color={isDark ? "#FFF" : "#1A1A1A"} />
+      <View style={[styles.activityIcon, { backgroundColor: item.bg }]}> 
+        <Ionicons name={item.icon} size={20} color={isDark ? "#FFFFFF" : "#1A1A1A"} />
       </View>
       <View>
         <Text style={[styles.activityLabel, isDark && styles.textWhite]}>{item.label}</Text>
-        <Text style={styles.activityCategory}>{item.category} • {item.time}</Text>
+        <Text style={[styles.activityCategory, isDark && styles.activityCategoryDark]}>{item.category} • {item.time}</Text>
       </View>
     </View>
     <Text style={[styles.activityAmount, item.amount.startsWith('+') ? styles.incomeText : (isDark && styles.textWhite)]}>{item.amount}</Text>
@@ -594,8 +613,8 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={isDark ? "#FFD54F" : "#1A1A1A"}
-            colors={["#FFD54F"]}
+            tintColor={isDark ? "#A78BFA" : "#7C3AED"}
+            colors={["#7C3AED"]}
           />
         }
       >
@@ -623,6 +642,7 @@ export default function HomeScreen() {
         {/* Hero Budget Card - Redesigned */}
         <FadeInView delay={300}>
           <View style={[styles.balanceCard, isDark && styles.balanceCardDark]}>
+            <View style={styles.glowAccent} />
             {/* Top Section: Balance & Trend */}
             <View style={styles.balanceHeader}>
               <View>
@@ -635,9 +655,9 @@ export default function HomeScreen() {
                 <Ionicons 
                   name={trendType === 'up' ? "trending-up" : "trending-down"} 
                   size={14} 
-                  color={trendType === 'up' ? '#4CAF50' : '#FF5252'} 
+                  color={trendType === 'up' ? '#10B981' : '#EF4444'} 
                 />
-                <Text style={[styles.trendPillText, { color: trendType === 'up' ? '#4CAF50' : '#FF5252' }]}>
+                <Text style={[styles.trendPillText, { color: trendType === 'up' ? '#10B981' : '#EF4444' }]}>
                   {trend}
                 </Text>
               </View>
@@ -702,25 +722,36 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Subscription Radar</Text>
             <Pressable onPress={() => router.push('/subscriptions')}>
-              <Text style={styles.seeAll}>See all</Text>
+              <Text style={[styles.seeAll, isDark && styles.seeAllDark]}>See all</Text>
             </Pressable>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subListContainer}
-          >
-            {dbSubs.length > 0 ? (
-              dbSubs.map((item) => (
+          {dbSubs.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.subListContainer}
+            >
+              {dbSubs.map((item) => (
                 <View key={item.id} style={{ marginRight: 16 }}>
-                  <SubscriptionCard item={item} />
+                  <SubscriptionCard item={item} isDark={isDark} />
                 </View>
-              ))
-            ) : (
-              <Text style={{ color: '#9E9E9E', marginLeft: 4 }}>No subscriptions tracked yet.</Text>
-            )}
-          </ScrollView>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={[styles.emptyWideCard, isDark && styles.emptyWideCardDark]}>
+              <View style={[styles.emptyWideIcon, { backgroundColor: isDark ? '#27272A' : '#EDE9FE' }]}>
+                <Ionicons name="apps-outline" size={28} color={isDark ? '#A78BFA' : '#7C3AED'} />
+              </View>
+              <View style={styles.emptyWideText}>
+                <Text style={[styles.emptyWideTitle, isDark && styles.textWhite]}>No subscriptions tracked yet.</Text>
+                <Text style={[styles.emptyWideDescription, isDark && styles.emptyWideDescriptionDark]}>Track your subscriptions and never miss a payment.</Text>
+              </View>
+              <Pressable onPress={() => router.push('/add-subscription')} style={[styles.emptyWideButton, isDark && styles.emptyWideButtonDark]}>
+                <Text style={[styles.emptyWideButtonText, isDark && styles.emptyWideButtonTextDark]}>Add One</Text>
+              </Pressable>
+            </View>
+          )}
         </FadeInView>
 
         {/* Savings Goals Section */}
@@ -728,25 +759,36 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Savings Goals</Text>
             <Pressable onPress={() => router.push('/savings-goals')}>
-              <Text style={styles.seeAll}>See all</Text>
+              <Text style={[styles.seeAll, isDark && styles.seeAllDark]}>See all</Text>
             </Pressable>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subListContainer}
-          >
-            {savingsGoals.length > 0 ? (
-              savingsGoals.map((item) => (
+          {savingsGoals.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.subListContainer}
+            >
+              {savingsGoals.map((item) => (
                 <View key={item.id} style={{ marginRight: 16 }}>
-                  <GoalCard item={item} format={format} />
+                  <GoalCard item={item} format={format} isDark={isDark} />
                 </View>
-              ))
-            ) : (
-              <Text style={{ color: '#9E9E9E', marginLeft: 4 }}>No savings goals yet. Create one!</Text>
-            )}
-          </ScrollView>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={[styles.emptyWideCard, isDark && styles.emptyWideCardDark]}>
+              <View style={[styles.emptyWideIcon, { backgroundColor: isDark ? '#27272A' : '#DCFCE7' }]}>
+                <Ionicons name={"target-outline" as any} size={28} color="#10B981" />
+              </View>
+              <View style={styles.emptyWideText}>
+                <Text style={[styles.emptyWideTitle, isDark && styles.textWhite]}>No savings goals yet.</Text>
+                <Text style={[styles.emptyWideDescription, isDark && styles.emptyWideDescriptionDark]}>Create a goal and start building your future.</Text>
+              </View>
+              <Pressable onPress={() => router.push('/savings-goals')} style={[styles.emptyWideButton, isDark && styles.emptyWideButtonDark]}>
+                <Text style={[styles.emptyWideButtonText, isDark && styles.emptyWideButtonTextDark]}>Create Goal</Text>
+              </Pressable>
+            </View>
+          )}
         </FadeInView>
 
         {/* Activity Section */}
@@ -754,7 +796,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Recent Activity</Text>
             <Pressable onPress={() => router.push('/transactions')}>
-              <Text style={styles.seeAll}>See all</Text>
+              <Text style={[styles.seeAll, isDark && styles.seeAllDark]}>See all</Text>
             </Pressable>
           </View>
           <View style={styles.activityGroup}>
@@ -785,7 +827,7 @@ export default function HomeScreen() {
                 </FadeInView>
               ))
             ) : (
-              <Text style={{ color: '#9E9E9E', fontStyle: 'italic' }}>No recent activity (Start adding transaction!)</Text>
+              <Text style={[styles.emptyWideDescription, isDark && styles.emptyWideDescriptionDark, { fontStyle: 'italic' }]}>No recent activity (Start adding transaction!)</Text>
             )}
           </View>
         </FadeInView>
@@ -930,19 +972,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 4,
+    position: 'relative',
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: '#EDE9FE',
   },
   balanceCardDark: {
     backgroundColor: '#1A1A1A',
     borderColor: '#333',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
   },
   balanceHeader: {
     flexDirection: 'row',
@@ -1044,6 +1081,111 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+    gap: 12,
+  },
+  emptyWideCard: {
+    width: '100%',
+    padding: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
+    backgroundColor: '#FFFFFF',
+  },
+  emptyWideCardDark: {
+    borderColor: '#27272A',
+    backgroundColor: '#18181b',
+  },
+  emptyWideIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyWideText: {
+    flex: 1,
+  },
+  emptyWideTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  emptyWideDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  emptyWideDescriptionDark: {
+    color: '#A1A1AA',
+  },
+  emptyStateDescriptionDark: {
+    color: '#A1A1AA',
+  },
+  seeAllDark: {
+    color: '#D1D5DB',
+  },
+  emptyWideButton: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#7C3AED',
+  },
+  emptyWideButtonDark: {
+    borderColor: '#A78BFA',
+  },
+  emptyWideButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#7C3AED',
+  },
+  emptyWideButtonTextDark: {
+    color: '#A78BFA',
+  },
+  emptyStateIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  emptyStateTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  emptyStateDescription: {
+    fontSize: 13,
+    color: '#71717A',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  emptyStateCTA: {
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#7C3AED',
+  },
+  emptyStateCTADark: {
+    borderColor: '#A78BFA',
+  },
+  emptyStateCTAText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#7C3AED',
+  },
+  emptyStateCTATextDark: {
+    color: '#A78BFA',
+  },
   balanceStatLabel: {
     fontSize: 12,
     fontWeight: '500',
@@ -1061,20 +1203,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4F4F5',
     marginHorizontal: 16,
   },
+  glowAccent: {
+    position: 'absolute',
+    top: -20,
+    right: -20,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#7C3AED',
+    opacity: 0.12,
+  },
   heroCard: {
     borderRadius: 32,
     padding: 24,
     paddingVertical: 28,
-    shadowColor: '#FFD54F',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    borderWidth: 1,
+    borderColor: '#EDE9FE',
   },
   heroCardDark: {
     borderWidth: 1,
     borderColor: '#333',
-    shadowColor: '#000',
   },
   heroHeader: {
     flexDirection: 'row',
@@ -1192,11 +1340,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   fab: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    elevation: 0,
   },
   fabGradient: {
     width: 64,
@@ -1228,96 +1372,135 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   cardLight: {
-    backgroundColor: '#FAFAFA',
-    borderColor: '#F5F5F5',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EDE9FE',
   },
   cardDark: {
-    backgroundColor: '#1A1A1A',
-    borderColor: '#333',
+    backgroundColor: '#121212',
+    borderColor: '#27272A',
   },
   subCard: {
-    width: 140,
-    height: 170,
+    minWidth: 320,
     padding: 16,
-    paddingVertical: 20,
     borderRadius: 24,
-    gap: 8,
     borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EDE9FE',
+  },
+  subCardDark: {
+    backgroundColor: '#18181B',
+    borderColor: '#27272A',
+  },
+  subRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
   subIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 50,
+    height: 50,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
+  },
+  subContent: {
+    flex: 1,
   },
   subName: {
     fontSize: 16,
     fontWeight: '700',
     color: '#1A1A1A',
   },
+  subNameDark: {
+    color: '#F4F4F5',
+  },
   subDue: {
-    fontSize: 12,
-    color: '#9E9E9E',
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  subDueDark: {
+    color: '#A1A1AA',
   },
   subAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A1A',
-    marginTop: 4,
+    color: '#7C3AED',
   },
   goalCard: {
-    width: 160,
-    height: 180,
+    minWidth: 320,
     padding: 16,
-    paddingVertical: 20,
     borderRadius: 24,
-    gap: 8,
     borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EDE9FE',
+  },
+  goalCardDark: {
+    backgroundColor: '#18181B',
+    borderColor: '#27272A',
+  },
+  goalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
   goalIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 50,
+    height: 50,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
+  },
+  goalContent: {
+    flex: 1,
   },
   goalName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: '#1A1A1A',
+  },
+  goalNameDark: {
+    color: '#F4F4F5',
   },
   goalProgressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 4,
+    marginTop: 6,
   },
   goalProgressBg: {
     flex: 1,
     height: 6,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(124, 58, 237, 0.12)',
     borderRadius: 3,
     overflow: 'hidden',
   },
   goalProgressFill: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#7C3AED',
     borderRadius: 3,
   },
   goalPercentage: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#4CAF50',
+    color: '#7C3AED',
     width: 35,
   },
+  goalAmountWrapper: {
+    alignItems: 'flex-end',
+  },
   goalAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#7C3AED',
+  },
+  goalTarget: {
+    fontSize: 12,
+    color: '#6B7280',
     marginTop: 4,
+  },
+  goalTargetDark: {
+    color: '#A1A1AA',
   },
   activityGroup: {
     gap: 12,
@@ -1329,6 +1512,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 20,
     borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EDE9FE',
   },
   activityLeft: {
     flexDirection: 'row',
@@ -1351,6 +1536,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#9E9E9E',
     marginTop: 2,
+  },
+  activityCategoryDark: {
+    color: '#A1A1AA',
   },
   activityAmount: {
     fontSize: 16,
@@ -1410,16 +1598,16 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
   },
   txInfoCard: {
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: '#EDE9FE',
     overflow: 'hidden',
     marginTop: 8,
   },
   txInfoCardDark: {
-    backgroundColor: '#222',
-    borderColor: '#333',
+    backgroundColor: '#18181b',
+    borderColor: '#27272A',
   },
   txDetailRow: {
     flexDirection: 'row',

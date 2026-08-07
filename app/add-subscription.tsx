@@ -127,7 +127,7 @@ export default function AddSubscriptionScreen() {
                     contentContainerStyle={styles.scrollContent}
                 >
                     <View style={styles.inputGroup}>
-                        <Text style={styles.fieldLabel}>DETAILS</Text>
+                        <Text style={[styles.fieldLabel, isDark && styles.fieldLabelDark]}>DETAILS</Text>
                         <TextInput
                             style={[styles.input, isDark && styles.inputDark, isDark && styles.textWhite]}
                             placeholder="Service Name (e.g. Netflix)"
@@ -209,7 +209,7 @@ export default function AddSubscriptionScreen() {
                     <View style={styles.inputGroup}>
                         <Text style={styles.fieldLabel}>APPEARANCE</Text>
 
-                        <Text style={styles.pickerLabel}>Choose Icon</Text>
+                        <Text style={[styles.pickerLabel, isDark && styles.pickerLabelDark]}>Choose Icon</Text>
                         <View style={styles.pickerGrid}>
                             {AVAILABLE_ICONS.map((icon) => (
                                 <Pressable
@@ -222,7 +222,7 @@ export default function AddSubscriptionScreen() {
                             ))}
                         </View>
 
-                        <Text style={styles.pickerLabel}>Choose Color</Text>
+                        <Text style={[styles.pickerLabel, isDark && styles.pickerLabelDark]}>Choose Color</Text>
                         <View style={styles.pickerGrid}>
                             {AVAILABLE_COLORS.map((color) => (
                                 <Pressable
@@ -255,6 +255,7 @@ const styles = StyleSheet.create({
     scrollContent: { padding: 24, gap: 32, paddingBottom: 40 },
     inputGroup: { gap: 12 },
     fieldLabel: { fontSize: 12, fontWeight: '800', color: '#9E9E9E', letterSpacing: 1 },
+    fieldLabelDark: { color: '#D1D5DB' },
     input: { backgroundColor: '#FAFAFA', borderRadius: 16, padding: 16, fontSize: 16, color: '#1A1A1A', borderWidth: 1, borderColor: '#F0F0F0' },
     inputDark: { backgroundColor: '#1A1A1A', borderColor: '#333' },
     amountRow: { flexDirection: 'row', alignItems: 'center' },
@@ -267,6 +268,7 @@ const styles = StyleSheet.create({
     dateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FAFAFA', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#F0F0F0' },
     dateText: { fontSize: 16, color: '#1A1A1A', fontWeight: '600' },
     pickerLabel: { fontSize: 13, fontWeight: '600', color: '#9E9E9E', marginTop: 16 },
+    pickerLabelDark: { color: '#D1D5DB' },
     pickerGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
     iconOption: { width: ICON_SIZE, height: ICON_SIZE, borderRadius: 16, backgroundColor: '#FAFAFA', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#F0F0F0' },
     iconActive: { backgroundColor: '#1A1A1A', borderColor: '#1A1A1A' },

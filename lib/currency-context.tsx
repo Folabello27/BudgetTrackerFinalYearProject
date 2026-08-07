@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useCallback, useEffect, useState } from 'react';
-import { CurrencyCode, currencyService, CURRENCIES } from '@/lib/currency';
+import { CURRENCIES, CurrencyCode, convertAmountToCurrency, currencyService } from '@/lib/currency';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 interface CurrencyContextType {
   currency: CurrencyCode;
@@ -24,10 +24,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     currencyService.getUserCurrency().then(setCurrencyState);
   }, []);
 
-  // Fetch rates when currency changes
+  // Fetch the USD-to-currency rates once the selected currency changes
   useEffect(() => {
     setIsLoading(true);
-    currencyService.getExchangeRates(currency)
+    currencyService.getExchangeRates('USD')
       .then(setRates)
       .finally(() => setIsLoading(false));
   }, [currency]);
@@ -42,8 +42,11 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const format = useCallback((amount: number, curr?: CurrencyCode) => {
-    return currencyService.formatAmount(amount, curr || currency);
-  }, [currency]);
+    const targetCurrency = curr || currency;
+    const baseRate = rates?.[targetCurrency] ?? 1;
+    const convertedAmount = convertAmountToCurrency(amount, baseRate);
+    return currencyService.formatAmount(convertedAmount, targetCurrency);
+  }, [currency, rates]);
 
   const getRate = useCallback((to: CurrencyCode) => {
     return rates?.[to] || null;

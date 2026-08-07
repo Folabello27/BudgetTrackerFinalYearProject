@@ -123,7 +123,7 @@ export default function SubscriptionsScreen() {
             <View style={styles.subRight}>
                 <Text style={[styles.subAmount, isDark && styles.textWhite]}>{format(item.amount)}</Text>
                 {item.status === 'cancelled' && (
-                    <Text style={styles.cancelledLabel}>Cancelled</Text>
+                    <Text style={[styles.cancelledLabel, isDark && styles.cancelledLabelDark]}>Cancelled</Text>
                 )}
             </View>
         </Pressable>
@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
     sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1A1A1A' },
     sortText: { fontSize: 14, color: '#9E9E9E', fontWeight: '600' },
+    sortTextDark: { color: '#D1D5DB' },
     subItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 20, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#F5F5F5' },
     cardDark: { backgroundColor: '#1A1A1A', borderColor: '#333' },
     subIconContainer: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
@@ -225,6 +226,7 @@ const styles = StyleSheet.create({
     subRight: { alignItems: 'flex-end', gap: 4 },
     subAmount: { fontSize: 16, fontWeight: '700', color: '#1A1A1A' },
     cancelledLabel: { fontSize: 11, color: '#9E9E9E', fontWeight: '600', fontStyle: 'italic' },
+    cancelledLabelDark: { color: '#D1D5DB' },
     fab: { position: 'absolute', bottom: 30, right: 20, width: 64, height: 64, borderRadius: 32, backgroundColor: '#1A1A1A', justifyContent: 'center', alignItems: 'center' },
     fabDark: { backgroundColor: '#FFF' },
 });

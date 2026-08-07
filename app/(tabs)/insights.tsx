@@ -285,13 +285,13 @@ export default function InsightsScreen() {
                 onPress={() => setMode('expense')}
                 style={[styles.toggleBtn, mode === 'expense' && styles.toggleBtnActiveExp]}
               >
-                <Text style={[styles.toggleText, mode === 'expense' && styles.toggleTextActiveExp]}>Expense</Text>
+                <Text style={[styles.toggleText, isDark && styles.toggleTextDark, mode === 'expense' && styles.toggleTextActiveExp]}>Expense</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setMode('income')}
                 style={[styles.toggleBtn, mode === 'income' && styles.toggleBtnActiveInc]}
               >
-                <Text style={[styles.toggleText, mode === 'income' && styles.toggleTextActiveInc]}>Income</Text>
+                <Text style={[styles.toggleText, isDark && styles.toggleTextDark, mode === 'income' && styles.toggleTextActiveInc]}>Income</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -327,6 +327,7 @@ export default function InsightsScreen() {
             >
               <Text style={[
                 styles.segmentText,
+                isDark && styles.segmentTextDark,
                 period === p && (isDark ? styles.segmentTextActiveDark : styles.segmentTextActive)
               ]}>
                 {p}
@@ -434,10 +435,10 @@ export default function InsightsScreen() {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Top Categories</Text>
             <ScalePressable onPress={toggleSort} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Text style={{ color: '#9E9E9E', fontSize: 13, fontWeight: '600' }}>
+              <Text style={[styles.sortText, isDark && styles.sortTextDark]}>
                 {sortOrder === 'desc' ? 'Highest' : 'Lowest'}
               </Text>
-              <Ionicons name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={14} color="#9E9E9E" />
+              <Ionicons name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={14} color={isDark ? '#D1D5DB' : '#9E9E9E'} />
             </ScalePressable>
           </View>
 
@@ -499,7 +500,7 @@ export default function InsightsScreen() {
       {/* Export Modal */}
       <Modal visible={showExportModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={[styles.exportModalContent, isDark && styles.modalContentDark]}>
+          <View style={[styles.exportModalContent, isDark && styles.exportModalContentDark, isDark && styles.modalContentDark]}>
             <Text style={[styles.modalTitle, isDark && styles.textWhite]}>Export Report</Text>
             <Text style={styles.modalSubtitle}>Download your transaction history as CSV</Text>
             <TouchableOpacity
@@ -515,7 +516,7 @@ export default function InsightsScreen() {
               style={styles.cancelBtn}
               onPress={() => setShowExportModal(false)}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={[styles.cancelText, isDark && styles.cancelTextDark]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -586,6 +587,9 @@ const styles = StyleSheet.create({
   toggleTextActiveInc: {
     color: '#4CAF50',
   },
+  toggleTextDark: {
+    color: '#D1D5DB',
+  },
   textWhite: {
     color: '#FFFFFF',
   },
@@ -639,6 +643,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#9E9E9E',
+  },
+  segmentTextDark: {
+    color: '#D1D5DB',
   },
   segmentTextActive: {
     color: '#1A1A1A',
@@ -761,6 +768,50 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  sortText: {
+    color: '#9E9E9E',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  sortTextDark: {
+    color: '#D1D5DB',
+  },
+  categoryItemDark: {
+    backgroundColor: '#1A1A1A',
+  },
+  insightCardDark: {
+    backgroundColor: '#1A1A1A',
+    borderColor: '#333',
+  },
+  healthCardDark: {
+    backgroundColor: '#1A1A1A',
+    borderColor: '#333',
+  },
+  metricCardDark: {
+    backgroundColor: '#1A1A1A',
+    borderColor: '#333',
+  },
+  exportModalContentDark: {
+    backgroundColor: '#1A1A1A',
+  },
+  modalTitleDark: {
+    color: '#FFFFFF',
+  },
+  scoreLabelDark: {
+    color: '#D1D5DB',
+  },
+  healthDescDark: {
+    color: '#F8FAFC',
+  },
+  factorLabelDark: {
+    color: '#D1D5DB',
+  },
+  insightMessageDark: {
+    color: '#D1D5DB',
+  },
+  cancelTextDark: {
+    color: '#F8FAFC',
   },
   legendText: {
     fontSize: 12,
@@ -994,6 +1045,9 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2
   },
+  scoreLabelDark: {
+    color: '#D1D5DB',
+  },
   healthDesc: {
     marginTop: 16,
     fontSize: 16,
@@ -1017,10 +1071,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1A1A1A'
   },
+  factorValueDark: {
+    color: '#FFFFFF',
+  },
   factorLabel: {
     fontSize: 12,
     color: '#666',
     marginTop: 4
+  },
+  factorLabelDark: {
+    color: '#D1D5DB',
   },
   insightsSection: {
     gap: 12

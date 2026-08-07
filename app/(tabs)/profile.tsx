@@ -2,6 +2,7 @@ import { CurrencySelector } from '@/components/currency-selector';
 import { Colors } from '@/constants/Colors';
 import { useCurrency } from '@/hooks/use-currency';
 import { BiometricService } from '@/lib/biometrics';
+import { getReleaseHighlights } from '@/lib/release-notes';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,21 +12,21 @@ import { router, useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    RefreshControl,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const PERSONALITIES = {
@@ -77,6 +78,7 @@ export default function ProfileScreen() {
   const [biometricType, setBiometricType] = useState('Biometrics');
   const [refreshing, setRefreshing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const releaseHighlights = getReleaseHighlights('2.5.0');
 
   // Modals
   const [isAccountModalVisible, setIsAccountModalVisible] = useState(false);
@@ -95,7 +97,10 @@ export default function ProfileScreen() {
       if (savedAvatar) setAvatar(savedAvatar);
 
       const { data: { user } } = await supabase.auth.getUser();
+      let userId: string | null = null;
+
       if (user) {
+        userId = user.id;
         setEmail(user.email || '');
         if (user.user_metadata?.full_name) {
           setFullName(user.user_metadata.full_name);
@@ -106,7 +111,7 @@ export default function ProfileScreen() {
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
-          .eq('id', user.id)
+          .eq('id', userId)
           .single();
         setIsAdmin(profile?.role === 'admin');
       }
@@ -137,14 +142,16 @@ export default function ProfileScreen() {
         .eq('type', 'expense')
         .gte('date', startOfMonth);
 
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('monthly_budget')
-        .eq('id', user.id)
-        .single();
+      const prof = userId
+        ? await supabase
+            .from('profiles')
+            .select('monthly_budget')
+            .eq('id', userId)
+            .single()
+        : { data: null };
 
       const spent = monthTx?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
-      const budget = prof?.monthly_budget || 3000;
+      const budget = prof?.data?.monthly_budget || 3000;
       const ratio = spent / budget;
 
       if (!monthTx || monthTx.length === 0) setPersonality(PERSONALITIES.fresh_starter);
@@ -294,7 +301,7 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <Text style={[styles.headerTitle, isDark && styles.textWhite]}>Profile</Text>
           <Pressable onPress={() => router.push('/notifications')} style={[styles.bellButton, isDark && styles.bellButtonDark]}>
-            <Ionicons name="notifications-outline" size={24} color={isDark ? "#FFF" : "#1A1A1A"} />
+            <Ionicons name="notifications-outline" size={24} color={isDark ? "#A78BFA" : "#7C3AED"} />
             <View style={styles.bellBadge} />
           </Pressable>
         </View>
@@ -314,7 +321,7 @@ export default function ProfileScreen() {
             </View>
           </Pressable>
           <Text style={[styles.userName, isDark && styles.textWhite]}>{fullName}</Text>
-          <Text style={styles.userEmail}>{email}</Text>
+          <Text style={[styles.userEmail, isDark && styles.userEmailDark]}>{email}</Text>
         </View>
 
         {/* Personality Card */}
@@ -327,6 +334,21 @@ export default function ProfileScreen() {
           <View style={styles.personalityIcon}>
             <Ionicons name={personality.icon} size={24} color={personality.color} />
           </View>
+        </View>
+
+        <View style={[styles.projectCard, isDark && styles.cardDark]}>
+          <View style={styles.projectHeader}>
+            <Text style={styles.projectBadge}>NEW</Text>
+            <Text style={[styles.projectVersion, isDark && styles.textWhite]}>v2.5.0</Text>
+          </View>
+          <Text style={[styles.projectTitle, isDark && styles.textWhite]}>{releaseHighlights.title}</Text>
+          <Text style={[styles.projectSummary, isDark && styles.projectSummaryDark]}>{releaseHighlights.summary}</Text>
+          {releaseHighlights.highlights.slice(0, 3).map((item) => (
+            <View key={item} style={styles.projectPointRow}>
+              <Ionicons name="sparkles-outline" size={14} color={isDark ? '#FFD54F' : '#1A1A1A'} />
+              <Text style={[styles.projectPoint, isDark && styles.textWhite]}>{item}</Text>
+            </View>
+          ))}
         </View>
 
         {/* Settings Groups */}
@@ -374,8 +396,8 @@ export default function ProfileScreen() {
                 <Switch
                   value={notificationsEnabled}
                   onValueChange={toggleNotifications}
-                  trackColor={{ false: colors.border, true: colors.accent }}
-                  thumbColor={Platform.OS === 'ios' ? '#FFFFFF' : (notificationsEnabled ? colors.primary : '#f4f3f4')}
+                  trackColor={{ false: colors.border, true: '#7C3AED' }}
+                  thumbColor={Platform.OS === 'ios' ? '#FFFFFF' : (notificationsEnabled ? '#7C3AED' : '#f4f3f4')}
                 />
               }
             />
@@ -388,14 +410,14 @@ export default function ProfileScreen() {
                 <Switch
                   value={isDark}
                   onValueChange={toggleTheme}
-                  trackColor={{ false: colors.border, true: colors.accent }}
-                  thumbColor={Platform.OS === 'ios' ? '#FFFFFF' : (isDark ? colors.primary : '#f4f3f4')}
+                  trackColor={{ false: colors.border, true: '#7C3AED' }}
+                  thumbColor={Platform.OS === 'ios' ? '#FFFFFF' : (isDark ? '#A78BFA' : '#7C3AED')}
                 />
               }
             />
           </View>
 
-          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>About</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark, { marginTop: 20 }]}>About</Text>
 
           <View style={[styles.menuContainer, isDark && styles.cardDark]}>
             <MenuLink
@@ -431,8 +453,8 @@ export default function ProfileScreen() {
                     <Switch
                       value={biometricEnabled}
                       onValueChange={toggleBiometrics}
-                      trackColor={{ false: colors.border, true: colors.accent }}
-                      thumbColor={Platform.OS === 'ios' ? '#FFFFFF' : (biometricEnabled ? colors.primary : '#f4f3f4')}
+                      trackColor={{ false: colors.border, true: '#7C3AED' }}
+                      thumbColor={Platform.OS === 'ios' ? '#FFFFFF' : (biometricEnabled ? '#7C3AED' : '#f4f3f4')}
                     />
                   }
                 />
@@ -449,7 +471,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>Version 2.4.0</Text>
+        <Text style={styles.versionText}>Version 2.5.0</Text>
       </ScrollView>
 
       {/* Account Info Modal */}
@@ -643,6 +665,9 @@ const styles = StyleSheet.create({
     color: '#9E9E9E',
     marginTop: 2,
   },
+  userEmailDark: {
+    color: '#D1D5DB',
+  },
   personalityCard: {
     backgroundColor: '#1A1A1A',
     borderRadius: 20,
@@ -661,6 +686,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     letterSpacing: 1,
   },
+  personalityLabelDark: {
+    color: '#D1D5DB',
+  },
   personalityTitle: {
     color: '#FFD54F',
     fontSize: 16,
@@ -678,6 +706,59 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  projectCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  projectHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  projectBadge: {
+    backgroundColor: '#FFD54F',
+    color: '#1A1A1A',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  projectVersion: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#9E9E9E',
+  },
+  projectTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 6,
+  },
+  projectSummary: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 10,
+    lineHeight: 18,
+  },
+  projectSummaryDark: {
+    color: '#D1D5DB',
+  },
+  projectPointRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 6,
+  },
+  projectPoint: {
+    flex: 1,
+    fontSize: 13,
+    color: '#1A1A1A',
+  },
   settingsSection: {
     gap: 12,
   },
@@ -686,6 +767,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#9E9E9E',
     marginLeft: 4,
+  },
+  sectionTitleDark: {
+    color: '#D1D5DB',
   },
   menuContainer: {
     backgroundColor: '#FFFFFF',

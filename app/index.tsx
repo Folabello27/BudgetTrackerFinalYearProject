@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { Session } from '@supabase/supabase-js';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import type { Session } from '@supabase/supabase-js';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { STORAGE_KEYS } from '@/constants/storage';
 import { Colors } from '@/constants/theme';
@@ -64,14 +64,12 @@ export default function Index() {
 
   if (state === 'loading') {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: Colors.dark.background,
-        }}>
-        <ActivityIndicator size="large" color={Colors.dark.tint} />
+      <View style={styles.loadingScreen}>
+        <View style={styles.brandCard}>
+          <Text style={styles.brandTitle}>Budget Tracker</Text>
+          <Text style={styles.brandSubtitle}>Preparing your financial view…</Text>
+          <ActivityIndicator size="large" color={Colors.dark.tint} />
+        </View>
       </View>
     );
   }
@@ -86,4 +84,35 @@ export default function Index() {
 
   return <Redirect href="/(auth)/login" />;
 }
+
+const styles = StyleSheet.create({
+  loadingScreen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0F0F12',
+    padding: 24,
+  },
+  brandCard: {
+    width: '100%',
+    maxWidth: 360,
+    padding: 28,
+    borderRadius: 24,
+    backgroundColor: '#17171C',
+    borderWidth: 1,
+    borderColor: '#24242C',
+    alignItems: 'center',
+    gap: 12,
+  },
+  brandTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  brandSubtitle: {
+    fontSize: 14,
+    color: '#A8A8B3',
+    textAlign: 'center',
+  },
+});
 

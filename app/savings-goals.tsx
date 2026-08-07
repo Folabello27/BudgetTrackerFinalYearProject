@@ -25,12 +25,12 @@ interface GoalWithProgress extends SavingsGoal {
   progress: GoalProgress;
 }
 
-const ProgressBar = ({ percentage, color = '#FFD54F' }: { percentage: number; color?: string }) => (
+const ProgressBar = ({ percentage, color = '#FFD54F', isDark = false }: { percentage: number; color?: string; isDark?: boolean }) => (
   <View style={styles.progressContainer}>
-    <View style={styles.progressBg}>
+    <View style={[styles.progressBg, isDark && styles.progressBgDark]}>
       <View style={[styles.progressFill, { width: `${percentage}%`, backgroundColor: color }]} />
     </View>
-    <Text style={styles.progressText}>{percentage.toFixed(0)}%</Text>
+    <Text style={[styles.progressText, isDark && styles.textWhite]}>{percentage.toFixed(0)}%</Text>
   </View>
 );
 
@@ -167,10 +167,10 @@ export default function SavingsGoalsScreen() {
         <View style={styles.header}>
           <View>
             <Text style={[styles.title, isDark && styles.textWhite]}>Savings Goals</Text>
-            <Text style={styles.subtitle}>Track your financial dreams</Text>
+            <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>Track your financial dreams</Text>
           </View>
           <Pressable style={styles.addBtn} onPress={() => setShowAddModal(true)}>
-            <Ionicons name="add" size={24} color="#1A1A1A" />
+            <Ionicons name="add" size={24} color={isDark ? '#000' : '#1A1A1A'} />
           </Pressable>
         </View>
 
@@ -183,23 +183,23 @@ export default function SavingsGoalsScreen() {
         >
           <View style={styles.statsRow}>
             <View style={styles.stat}>
-              <Text style={styles.statValue}>{stats.totalGoals}</Text>
-              <Text style={styles.statLabel}>Goals</Text>
+              <Text style={[styles.statValue, isDark && styles.statValueDark]}>{stats.totalGoals}</Text>
+              <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>Goals</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.stat}>
-              <Text style={styles.statValue}>{stats.completedGoals}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
+              <Text style={[styles.statValue, isDark && styles.statValueDark]}>{stats.completedGoals}</Text>
+              <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>Completed</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.stat}>
-              <Text style={styles.statValue}>{format(stats.totalSaved)}</Text>
-              <Text style={styles.statLabel}>Saved</Text>
+              <Text style={[styles.statValue, isDark && styles.statValueDark]}>{format(stats.totalSaved)}</Text>
+              <Text style={[styles.statLabel, isDark && styles.statLabelDark]}>Saved</Text>
             </View>
           </View>
           <View style={styles.overallProgress}>
-            <Text style={styles.progressLabel}>Overall Progress</Text>
-            <ProgressBar percentage={stats.overallProgress} />
+            <Text style={[styles.progressLabel, isDark && styles.textGray]}>{'Overall Progress'}</Text>
+            <ProgressBar percentage={stats.overallProgress} isDark={isDark} />
           </View>
         </LinearGradient>
 
@@ -209,15 +209,15 @@ export default function SavingsGoalsScreen() {
           
           {goals.length === 0 ? (
             <View style={[styles.emptyState, isDark && styles.cardDark]}>
-              <Ionicons name="trophy-outline" size={48} color="#9E9E9E" />
-              <Text style={styles.emptyText}>No savings goals yet</Text>
-              <Text style={styles.emptySubtext}>Create your first goal to start saving!</Text>
+              <Ionicons name="trophy-outline" size={48} color={isDark ? '#FFF' : '#9E9E9E'} />
+              <Text style={[styles.emptyText, isDark && styles.textWhite]}>No savings goals yet</Text>
+              <Text style={[styles.emptySubtext, isDark && styles.textGray]}>Create your first goal to start saving!</Text>
             </View>
           ) : (
             goals.map((goal) => (
               <View key={goal.id} style={[styles.goalCard, isDark && styles.cardDark]}>
                 <View style={styles.goalHeader}>
-                  <View style={styles.goalIcon}>
+                  <View style={[styles.goalIcon, isDark && styles.goalIconDark]}>
                     <Ionicons 
                       name={goal.status === 'completed' ? "trophy" : "wallet-outline"} 
                       size={24} 
@@ -226,7 +226,7 @@ export default function SavingsGoalsScreen() {
                   </View>
                   <View style={styles.goalInfo}>
                     <Text style={[styles.goalName, isDark && styles.textWhite]}>{goal.name}</Text>
-                    <Text style={styles.goalAmount}>
+                    <Text style={[styles.goalAmount, isDark && styles.textGray]}>
                       {format(goal.current_amount)} of {format(goal.target_amount)}
                     </Text>
                   </View>
@@ -241,7 +241,7 @@ export default function SavingsGoalsScreen() {
                 />
 
                 {goal.progress.daysLeft !== null && (
-                  <Text style={styles.goalMeta}>
+                  <Text style={[styles.goalMeta, isDark && styles.textGray]}>
                     {goal.progress.daysLeft > 0 
                       ? `${goal.progress.daysLeft} days left • Need ${format(goal.progress.monthlyContributionNeeded || 0)}/month`
                       : 'Deadline passed'
@@ -257,7 +257,7 @@ export default function SavingsGoalsScreen() {
                       setShowContributeModal(true);
                     }}
                   >
-                    <Text style={styles.contributeText}>Add Contribution</Text>
+                    <Text style={[styles.contributeText, isDark && styles.textWhite]}>Add Contribution</Text>
                   </Pressable>
                 )}
 
@@ -285,37 +285,37 @@ export default function SavingsGoalsScreen() {
                 <Text style={[styles.modalTitle, isDark && styles.textWhite]}>Create Savings Goal</Text>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Goal Name</Text>
+                  <Text style={[styles.inputLabel, isDark && styles.textGray]}>Goal Name</Text>
                   <TextInput
                     style={[styles.input, isDark && styles.inputDark]}
                     value={newGoalName}
                     onChangeText={setNewGoalName}
                     placeholder="e.g., New Car, Emergency Fund"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={isDark ? '#CCC' : '#999'}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Target Amount ($)</Text>
+                  <Text style={[styles.inputLabel, isDark && styles.textGray]}>Target Amount ($)</Text>
                   <TextInput
                     style={[styles.input, isDark && styles.inputDark]}
                     value={newGoalTarget}
                     onChangeText={setNewGoalTarget}
                     keyboardType="decimal-pad"
                     placeholder="0.00"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={isDark ? '#CCC' : '#999'}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Current Savings (Optional)</Text>
+                  <Text style={[styles.inputLabel, isDark && styles.textGray]}>Current Savings (Optional)</Text>
                   <TextInput
                     style={[styles.input, isDark && styles.inputDark]}
                     value={newGoalCurrent}
                     onChangeText={setNewGoalCurrent}
                     keyboardType="decimal-pad"
                     placeholder="0.00"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={isDark ? '#CCC' : '#999'}
                   />
                 </View>
 
@@ -323,7 +323,7 @@ export default function SavingsGoalsScreen() {
                   <Text style={styles.createBtnText}>Create Goal</Text>
                 </Pressable>
                 <Pressable style={styles.cancelBtn} onPress={() => setShowAddModal(false)}>
-                  <Text style={styles.cancelText}>Cancel</Text>
+                  <Text style={[styles.cancelText, isDark && styles.textWhite]}>Cancel</Text>
                 </Pressable>
               </ScrollView>
             </View>
@@ -344,7 +344,7 @@ export default function SavingsGoalsScreen() {
               </Text>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Contribution Amount ($)</Text>
+                <Text style={[styles.inputLabel, isDark && styles.textGray]}>Contribution Amount ($)</Text>
                 <TextInput
                   style={[styles.input, isDark && styles.inputDark]}
                   value={contributionAmount}
@@ -367,7 +367,7 @@ export default function SavingsGoalsScreen() {
                   setSelectedGoal(null);
                 }}
               >
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={[styles.cancelText, isDark && styles.textWhite]}>Cancel</Text>
               </Pressable>
             </View>
           </View>
@@ -458,6 +458,12 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     marginBottom: 8
   },
+  statValueDark: {
+    color: '#FFFFFF'
+  },
+  statLabelDark: {
+    color: '#CCCCCC'
+  },
   progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -480,8 +486,20 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     width: 45
   },
-  goalsSection: {
-    gap: 16
+  progressBgDark: {
+    backgroundColor: 'rgba(255,255,255,0.1)'
+  },
+  subtitleDark: {
+    color: '#CCCCCC'
+  },
+  cardDark: {
+    backgroundColor: '#1A1A1A'
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 16
   },
   sectionTitle: {
     fontSize: 20,
@@ -527,6 +545,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF3E0',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  goalIconDark: {
+    backgroundColor: '#2A2A35'
   },
   goalInfo: {
     flex: 1

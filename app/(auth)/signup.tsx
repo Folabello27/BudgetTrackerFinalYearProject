@@ -1,17 +1,21 @@
-import { supabase } from '@/lib/supabase';
+import { setSessionFromOAuthRedirect, supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import * as AuthSession from 'expo-auth-session';
+import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
 } from 'react-native';
 
 type FocusOption = {
@@ -91,32 +95,33 @@ export default function SignupScreen() {
   async function handleGoogleSignIn() {
     try {
       setLoading(true);
+      const redirectTo = Constants.appOwnership === 'expo'
+        ? AuthSession.makeRedirectUri({ useProxy: true })
+        : Linking.createURL('auth-callback', { scheme: 'budgettracker' });
+      console.log('Google OAuth redirect URI:', redirectTo);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'budgettracker://google-auth',
+          redirectTo,
+          skipBrowserRedirect: true,
         },
       });
       if (error) throw error;
+      if (data?.url) {
+        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+        const callbackUrl = result.type === 'success' && 'url' in result ? result.url : await Linking.getInitialURL();
+        if (callbackUrl) {
+          console.log('Google auth callback URL:', callbackUrl);
+          await setSessionFromOAuthRedirect(callbackUrl);
+          router.replace('/(tabs)');
+          return;
+        }
+        throw new Error(`Google sign-in failed: ${result.type}`);
+      } else {
+        throw new Error('Unable to start Google sign-in flow.');
+      }
     } catch (error: any) {
       setStatus({ type: 'error', message: `Google Sign-In: ${error.message}` });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleAppleSignIn() {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: 'budgettracker://apple-auth',
-        },
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      setStatus({ type: 'error', message: `Apple Sign-In: ${error.message}` });
     } finally {
       setLoading(false);
     }
@@ -131,9 +136,13 @@ export default function SignupScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
           <View style={styles.header}>
+            <View style={styles.brandChip}>
+              <Ionicons name="sparkles-outline" size={18} color="#1A1A1A" />
+              <Text style={styles.brandText}>Build your money plan</Text>
+            </View>
             <Text style={styles.title}>Create Account</Text>
             <Text style={styles.subtitle}>
-              Start tracking your expenses and save for your dreams today.
+              Set up your account and start turning everyday spending into clear, intentional progress.
             </Text>
           </View>
 
@@ -260,9 +269,6 @@ export default function SignupScreen() {
 
           {/* Social Logins */}
           <View style={styles.socialContainer}>
-            <Pressable style={styles.socialButton} onPress={handleAppleSignIn} disabled={loading}>
-              <Ionicons name="logo-apple" size={24} color="#000" />
-            </Pressable>
             <Pressable style={styles.socialButton} onPress={handleGoogleSignIn} disabled={loading}>
               <Ionicons name="logo-google" size={24} color="#EA4335" />
             </Pressable>
@@ -294,6 +300,22 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 20, // Reduced from 32
+  },
+  brandChip: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#EDE9FE',
+    marginBottom: 16,
+  },
+  brandText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#7C3AED',
   },
   title: {
     fontSize: 24, // Reduced from 28
@@ -379,7 +401,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: '#C1F232',
     fontSize: 15,
     fontWeight: '700',
   },

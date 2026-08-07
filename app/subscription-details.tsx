@@ -279,29 +279,28 @@ export default function SubscriptionDetailsScreen() {
                     <Text style={[styles.subName, isDark && styles.textWhite]}>{sub.name}</Text>
                     <View style={styles.amountContainer}>
                         <Text style={[styles.amountValue, isDark && styles.textWhite]}>{format(sub.amount)}</Text>
-                        <Text style={styles.periodLabel}>/{sub.period === 'MO' ? 'month' : 'year'}</Text>
+                        <Text style={[styles.periodLabel, isDark && styles.periodLabelDark]}>/{sub.period === 'MO' ? 'month' : 'year'}</Text>
+                        {sub.status === 'cancelled' && (
+                            <View style={[styles.cancelledBadge, isDark && styles.cancelledBadgeDark]}>
+                                <Text style={[styles.cancelledText, isDark && styles.textGray]}>CANCELLED</Text>
+                            </View>
+                        )}
                     </View>
-
-                    {sub.status === 'cancelled' && (
-                        <View style={[styles.cancelledBadge, isDark && styles.cancelledBadgeDark]}>
-                            <Text style={[styles.cancelledText, isDark && styles.textGray]}>CANCELLED</Text>
-                        </View>
-                    )}
                 </View>
 
                 <View style={styles.infoRow}>
                     <View style={[styles.infoCard, isDark && styles.cardDark]}>
-                        <Text style={styles.infoLabel}>Next Bill</Text>
+                        <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>Next Bill</Text>
                         <Text style={[styles.infoValue, isDark && styles.textWhite]}>{nextOccurrence}</Text>
                     </View>
                     <View style={[styles.infoCard, isDark && styles.cardDark]}>
-                        <Text style={styles.infoLabel}>Billing Cycle</Text>
+                        <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>Billing Cycle</Text>
                         <Text style={[styles.infoValue, isDark && styles.textWhite]}>{sub.period === 'MO' ? 'Monthly' : 'Yearly'}</Text>
                     </View>
                 </View>
 
                 <View style={styles.statsSection}>
-                    <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Overview</Text>
+                    <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Overview</Text>
                     <View style={[styles.overviewCard, isDark && styles.overviewCardDark]}>
                         <View style={styles.overviewRow}>
                             <View style={styles.overviewItem}>
@@ -318,7 +317,7 @@ export default function SubscriptionDetailsScreen() {
                 </View>
 
                 <View style={styles.actionsSection}>
-                    <Text style={[styles.sectionTitle, isDark && styles.textWhite]}>Actions</Text>
+                    <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Actions</Text>
 
                     <Pressable style={[styles.actionItem, isDark && styles.cardDark]} onPress={handleToggleMute}>
                         <View style={[styles.actionIcon, isDark ? (isMuted ? styles.actionIconMutedDark : styles.actionIconDark) : (isMuted ? styles.actionIconMuted : styles.actionIconLight)]}>

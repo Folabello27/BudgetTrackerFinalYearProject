@@ -4,26 +4,28 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useRef, useState } from 'react';
 import type { FlatList } from 'react-native';
 import {
-  ImageSourcePropType,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-  ViewToken,
+    ImageSourcePropType,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+    ViewToken,
 } from 'react-native';
 import Animated, {
-  Extrapolate,
-  FadeInDown,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
+    Extrapolate,
+    FadeInDown,
+    interpolate,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
 } from 'react-native-reanimated';
 
 import { STORAGE_KEYS } from '@/constants/storage';
+
+const BRAND_ACCENT = '#C1F232';
 
 type Slide = {
   id: string;
@@ -35,20 +37,20 @@ type Slide = {
 const SLIDES: Slide[] = [
   {
     id: '1',
-    title: 'Stop guessing where your money goes.',
-    description: 'Track spending, spot subscriptions, and grow your "Safe-to-Spend" balance.',
+    title: 'See your money clearly before it slips away.',
+    description: 'Budget Tracker helps you understand spending in real time with a calm, practical view of your finances.',
     image: require('@/assets/images/onboarding images/image 12.png'),
   },
   {
     id: '2',
-    title: 'Budget by your week, not just by month.',
-    description: 'Create micro-budgets that adapt to weekdays, weekends, or paydays to enhance your cash flow.',
+    title: 'Turn habits into better decisions.',
+    description: 'Spot subscriptions, review categories, and stay ahead of overspending without feeling overwhelmed.',
     image: require('@/assets/images/onboarding images/image 13.png'),
   },
   {
     id: '3',
-    title: 'See how your feelings shape your finances.',
-    description: 'Tag your check-ins with your mood to uncover patterns like "stress Thursdays" and create sustainable budgets.',
+    title: 'Build a plan that fits your life.',
+    description: 'Create goals, track progress, and make every month feel more intentional and less reactive.',
     image: require('@/assets/images/onboarding images/image 14.png'),
   },
 ];
@@ -197,6 +199,9 @@ export default function OnboardingScreen() {
       {/* Header Skip Button */}
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
+          <View style={styles.brandPill}>
+            <Text style={styles.brandText}>Budget Tracker</Text>
+          </View>
           <Pressable onPress={handleSkip} style={styles.skipButton}>
             <Text style={styles.skipText}>Skip</Text>
           </Pressable>
@@ -262,14 +267,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: Platform.OS === 'android' ? 40 : 10,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     width: '100%',
+  },
+  brandPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#F4F7E8',
+  },
+  brandText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    letterSpacing: 0.3,
   },
   skipButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#F7F7F7', // Light grey pill
+    backgroundColor: '#F7F7F7',
   },
   skipText: {
     fontSize: 14,
@@ -283,7 +301,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '800', // Extra bold
+    fontWeight: '800',
     color: '#1A1A1A',
     textAlign: 'center',
     marginBottom: 16,

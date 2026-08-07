@@ -72,7 +72,7 @@ function RootLayoutContent() {
         <Stack.Screen name="subscriptions" options={{ headerShown: false }} />
         <Stack.Screen name="subscription-details" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Quick action' }} />
       </Stack>
       <StatusBar style={isDark ? "light" : "dark"} />
     </ThemeProvider>

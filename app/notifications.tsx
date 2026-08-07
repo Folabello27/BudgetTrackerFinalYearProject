@@ -300,6 +300,9 @@ const styles = StyleSheet.create({
         color: '#9E9E9E',
         fontWeight: '500',
     },
+    emptyTextDark: {
+        color: '#FFFFFF',
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',

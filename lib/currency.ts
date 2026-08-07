@@ -25,6 +25,14 @@ interface ExchangeRateCache {
   timestamp: number;
 }
 
+export function convertAmountToCurrency(amount: number, rate: number): number {
+  if (!Number.isFinite(amount) || !Number.isFinite(rate) || rate === 0) {
+    return amount;
+  }
+
+  return Number((amount * rate).toFixed(2));
+}
+
 class CurrencyService {
   private apiUrl = 'https://api.exchangerate-api.com/v4/latest';
 
